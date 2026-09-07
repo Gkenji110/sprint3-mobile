@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useResponsavel } from "@/context/ResponsavelContext";
 import { Sessao } from "@/services/auth.service";
+import { buscarResponsavelPorId } from "@/services/responsavel.service";
 import { useCallback } from "react";
 
 /**
@@ -12,20 +13,33 @@ import { useCallback } from "react";
  */
 
 /**
- * O telefone não vem na resposta de autenticação, então o que já estiver salvo
- * é preservado. A fatia de integração troca este preenchimento por uma consulta
- * a `GET /api/responsaveis/{id}`.
+ * O `LoginResponse` não traz CPF. Ele vem de uma segunda chamada autenticada —
+ * `GET /api/responsaveis/{id}` — porque `POST /api/pets` exige esse dado, e
+ * inflar a resposta de login só por isso acopla autenticação a perfil (ver
+ * `docs/plano-integracao-api.md`). O telefone continua vindo do que já estava
+ * salvo, como antes: essa fatia não mexe nisso.
+ *
+ * Se a busca falhar, a sessão abre normalmente — só fica sem CPF, e é o
+ * cadastro de pet que trata essa ausência, não o login.
  */
 export function useIniciarSessao() {
   const { entrar } = useAuth();
   const { responsavel, updateResponsavel } = useResponsavel();
 
   return useCallback(
-    async (sessao: Sessao) => {
-      await entrar(sessao);
+    async (sessaoBase: Sessao) => {
+      let cpf: string | undefined;
+      try {
+        const perfil = await buscarResponsavelPorId(sessaoBase.id, sessaoBase.token);
+        cpf = perfil.cpf;
+      } catch {
+        // Sessão continua válida sem CPF; quem precisa dele reage à ausência.
+      }
+
+      await entrar(cpf ? { ...sessaoBase, cpf } : sessaoBase);
       await updateResponsavel({
-        nome: sessao.nome,
-        email: sessao.email,
+        nome: sessaoBase.nome,
+        email: sessaoBase.email,
         telefone: responsavel?.telefone ?? "",
       });
     },
