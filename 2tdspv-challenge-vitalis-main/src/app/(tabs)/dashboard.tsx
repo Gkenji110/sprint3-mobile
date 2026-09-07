@@ -1,13 +1,14 @@
-import { usePet } from "@/context/PetContext";
+import { usePets } from "@/hooks/usePets";
 import { useResponsavel } from "@/context/ResponsavelContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
-  const { current, pets } = usePet();
+  const { data: pets = [], isLoading } = usePets();
+  const current = pets[0];
   const { responsavel, recarregarResponsavel } = useResponsavel();
 
   useEffect(() => {
@@ -29,7 +30,11 @@ export default function DashboardScreen() {
         </View>
 
         {/* Card do Pet Ativo */}
-        {current ? (
+        {isLoading ? (
+          <View className="bg-surface-container-low rounded-3xl p-10 mb-6 items-center">
+            <ActivityIndicator size="large" color="#02C39A" />
+          </View>
+        ) : current ? (
           <View className="bg-secondary rounded-3xl p-6 mb-6">
             <View className="flex-row items-center gap-3 mb-4">
               <View className="bg-primary-container px-3 py-1 rounded-full">
@@ -42,21 +47,21 @@ export default function DashboardScreen() {
               {current.nome}
             </Text>
             <Text className="text-primary-container text-lg font-body">
-              {current.especie} · {current.raca}
+              {current.especie}{current.raca ? ` · ${current.raca}` : ""}
             </Text>
             <View className="flex-row gap-4 mt-4 pt-4 border-t border-white/10">
               <View>
                 <Text className="text-white/60 text-xs uppercase font-bold tracking-widest">
                   Peso
                 </Text>
-                <Text className="text-white font-semibold">{current.peso} kg</Text>
+                <Text className="text-white font-semibold">{current.peso ?? "—"} kg</Text>
               </View>
               <View className="w-px bg-white/10" />
               <View>
                 <Text className="text-white/60 text-xs uppercase font-bold tracking-widest">
                   Sexo
                 </Text>
-                <Text className="text-white font-semibold">{current.sexo}</Text>
+                <Text className="text-white font-semibold">{current.genero ?? "—"}</Text>
               </View>
             </View>
           </View>

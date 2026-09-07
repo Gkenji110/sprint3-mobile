@@ -1,6 +1,7 @@
 import MyTextInput from "@/components/MyTextInput";
 import { useLembrete } from "@/context/LembreteContext";
-import { usePet } from "@/context/PetContext";
+import { usePets } from "@/hooks/usePets";
+import { iconeDaEspecie } from "@/utils/petIcon";
 import {
   LembreteInput,
   LembreteSchema,
@@ -24,7 +25,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function AddLembreteScreen() {
   const router = useRouter();
   const { addLembrete } = useLembrete();
-  const { pets } = usePet();
+  const { data: pets = [] } = usePets();
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -229,13 +230,7 @@ export default function AddLembreteScreen() {
                         }`}
                       >
                         <Text className="text-xl">
-                          {pet.especie === "Cachorro"
-                            ? "🐶"
-                            : pet.especie === "Gato"
-                            ? "🐱"
-                            : pet.especie === "Pássaro"
-                            ? "🐦"
-                            : "🐾"}
+                          {iconeDaEspecie(pet.especie)}
                         </Text>
                         <Text
                           className={`font-bold font-headline ${

@@ -1,4 +1,5 @@
-import { usePet } from "@/context/PetContext";
+import { usePets } from "@/hooks/usePets";
+import { iconeDaEspecie } from "@/utils/petIcon";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
@@ -33,7 +34,7 @@ const DURACOES = [
 ];
 
 export default function SintomasScreen() {
-  const { pets } = usePet();
+  const { data: pets = [] } = usePets();
 
   const [sintomasSelecionados, setSintomasSelecionados] = useState<string[]>([]);
   const [descricao, setDescricao] = useState("");
@@ -112,13 +113,7 @@ export default function SintomasScreen() {
                     }`}
                   >
                     <Text className="text-xl">
-                      {pet.especie === "Cachorro"
-                        ? "🐶"
-                        : pet.especie === "Gato"
-                        ? "🐱"
-                        : pet.especie === "Pássaro"
-                        ? "🐦"
-                        : "🐾"}
+                      {iconeDaEspecie(pet.especie)}
                     </Text>
                     <Text
                       className={`font-bold font-headline ${

@@ -1,6 +1,7 @@
 import MyTextInput from "@/components/MyTextInput";
 import { useLembrete } from "@/context/LembreteContext";
-import { usePet } from "@/context/PetContext";
+import { usePets } from "@/hooks/usePets";
+import { iconeDaEspecie } from "@/utils/petIcon";
 import {
   LembreteInput,
   LembreteSchema,
@@ -28,7 +29,7 @@ export default function EditLembreteScreen() {
   }>();
 
   const { updateLembrete } = useLembrete();
-  const { pets } = usePet();
+  const { data: pets = [] } = usePets();
 
   const lembreteData: LembreteInput = JSON.parse(lembrete);
   const lembreteIndex = parseInt(index);
@@ -231,13 +232,7 @@ export default function EditLembreteScreen() {
                         }`}
                       >
                         <Text className="text-xl">
-                          {pet.especie === "Cachorro"
-                            ? "🐶"
-                            : pet.especie === "Gato"
-                            ? "🐱"
-                            : pet.especie === "Pássaro"
-                            ? "🐦"
-                            : "🐾"}
+                          {iconeDaEspecie(pet.especie)}
                         </Text>
                         <Text
                           className={`font-bold font-headline ${

@@ -1,14 +1,15 @@
-import { usePet } from "@/context/PetContext";
+import { usePets } from "@/hooks/usePets";
 import { useVacina } from "@/context/VacinaContext";
 import VacinaCard from "@/components/VacinaCard";
+import { iconeDaEspecie } from "@/utils/petIcon";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PetDetailsScreen() {
   const { index } = useLocalSearchParams<{ index: string }>();
-  const { pets } = usePet();
+  const { data: pets = [], isLoading } = usePets();
   const { getVacinasPorPet, removeVacina, vacinas } = useVacina();
 
   const petIndex = parseInt(index);
@@ -35,6 +36,14 @@ export default function PetDetailsScreen() {
     );
   };
 
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-surface items-center justify-center">
+        <ActivityIndicator size="large" color="#02C39A" />
+      </SafeAreaView>
+    );
+  }
+
   if (!pet) {
     return (
       <SafeAreaView className="flex-1 bg-surface items-center justify-center gap-4">
@@ -57,22 +66,14 @@ export default function PetDetailsScreen() {
         <View className="bg-secondary rounded-3xl p-6 mb-6">
           <View className="flex-row items-center gap-4 mb-4">
             <View className="bg-primary-container w-16 h-16 rounded-full items-center justify-center">
-              <Text className="text-3xl">
-                {pet.especie === "Cachorro"
-                  ? "🐶"
-                  : pet.especie === "Gato"
-                  ? "🐱"
-                  : pet.especie === "Pássaro"
-                  ? "🐦"
-                  : "🐾"}
-              </Text>
+              <Text className="text-3xl">{iconeDaEspecie(pet.especie)}</Text>
             </View>
             <View>
               <Text className="text-white text-2xl font-bold font-headline">
                 {pet.nome}
               </Text>
               <Text className="text-primary-container font-body">
-                {pet.especie} · {pet.raca}
+                {pet.especie}{pet.raca ? ` · ${pet.raca}` : ""}
               </Text>
             </View>
           </View>
@@ -82,14 +83,14 @@ export default function PetDetailsScreen() {
               <Text className="text-white/60 text-xs uppercase font-bold tracking-widest">
                 Peso
               </Text>
-              <Text className="text-white font-semibold">{pet.peso} kg</Text>
+              <Text className="text-white font-semibold">{pet.peso ?? "—"} kg</Text>
             </View>
             <View className="w-px bg-white/10" />
             <View>
               <Text className="text-white/60 text-xs uppercase font-bold tracking-widest">
                 Sexo
               </Text>
-              <Text className="text-white font-semibold">{pet.sexo}</Text>
+              <Text className="text-white font-semibold">{pet.genero ?? "—"}</Text>
             </View>
           </View>
         </View>

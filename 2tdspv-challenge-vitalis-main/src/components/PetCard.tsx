@@ -1,9 +1,19 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
-import { PetInput } from "@/schemas/pet.schema";
+import { iconeDaEspecie } from "@/utils/petIcon";
+
+/**
+ * Formato mínimo que o card precisa — hoje sempre um `PetApiResponse`, mas
+ * fica desacoplado do tipo da API pra não amarrar o componente a um serviço.
+ */
+interface PetCardData {
+  nome: string;
+  especie: string;
+  raca?: string;
+}
 
 interface PetCardProps {
-  pet: PetInput;
+  pet: PetCardData;
   onPress: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -20,22 +30,14 @@ const PetCard = ({ pet, onPress, onEdit, onDelete }: PetCardProps) => {
           className="flex-row items-center gap-4 flex-1"
         >
           <View className="bg-primary-container w-14 h-14 rounded-full items-center justify-center">
-            <Text className="text-2xl">
-              {pet.especie === "Cachorro"
-                ? "🐶"
-                : pet.especie === "Gato"
-                ? "🐱"
-                : pet.especie === "Pássaro"
-                ? "🐦"
-                : "🐾"}
-            </Text>
+            <Text className="text-2xl">{iconeDaEspecie(pet.especie)}</Text>
           </View>
           <View>
             <Text className="text-on-surface font-bold font-headline text-lg">
               {pet.nome}
             </Text>
             <Text className="text-on-surface-variant font-body text-sm">
-              {pet.especie} · {pet.raca}
+              {pet.especie}{pet.raca ? ` · ${pet.raca}` : ""}
             </Text>
           </View>
         </TouchableOpacity>

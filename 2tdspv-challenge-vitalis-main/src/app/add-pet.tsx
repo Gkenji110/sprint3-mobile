@@ -1,5 +1,4 @@
 import MyTextInput from "@/components/MyTextInput";
-import { usePet } from "@/context/PetContext";
 import { ESPECIES, PetInput, PetSchema, SEXOS } from "@/schemas/pet.schema";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,7 +17,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddPetScreen() {
   const router = useRouter();
-  const { addPet } = usePet();
 
   const {
     control,
@@ -35,11 +33,16 @@ export default function AddPetScreen() {
     resolver: zodResolver(PetSchema),
   });
 
-  const handleAdd = async (data: PetInput) => {
-    await addPet(data);
-    Alert.alert("Sucesso", "Pet cadastrado com sucesso!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+  /**
+   * Cadastrar pet via API ainda não foi migrado (é a próxima etapa — depende
+   * do CPF do responsável, já disponível na sessão). O formulário fica
+   * visível pra não perder o trabalho de UI, só o envio real está pendente.
+   */
+  const handleAdd = async (_data: PetInput) => {
+    Alert.alert(
+      "Em breve",
+      "O cadastro de pet pela API ainda não foi implementado nesta etapa.",
+    );
   };
 
   return (
