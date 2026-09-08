@@ -1,5 +1,5 @@
 import MyTextInput from "@/components/MyTextInput";
-import { useCadastro } from "@/hooks/useCadastro";
+import { useCadastroMutation } from "@/hooks/useCadastroMutation";
 import { CadastroInput, CadastroSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CadastroScreen() {
-  const { mutate: cadastrar, isPending } = useCadastro();
+  const { mutate: cadastrar, isPending } = useCadastroMutation();
 
   const {
     control,

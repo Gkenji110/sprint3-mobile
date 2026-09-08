@@ -9,7 +9,7 @@ import { useIniciarSessao } from "./useSessao";
  * percebe e leva ao dashboard. É o controle de acesso governando a navegação,
  * em vez de cada tela decidir por conta própria para onde ir.
  */
-export function useLogin() {
+export function useLoginMutation() {
   const iniciarSessao = useIniciarSessao();
 
   return useMutation({

@@ -1,5 +1,5 @@
 import MyTextInput from "@/components/MyTextInput";
-import { useLogin } from "@/hooks/useLogin";
+import { useLoginMutation } from "@/hooks/useLoginMutation";
 import { LoginInput, LoginSchema } from "@/schemas/auth.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
@@ -15,7 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-  const { mutate: autenticar, isPending } = useLogin();
+  const { mutate: autenticar, isPending } = useLoginMutation();
 
   const {
     control,

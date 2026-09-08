@@ -8,7 +8,7 @@ import { useIniciarSessao } from "./useSessao";
  * Como o registro já devolve o token, o usuário entra direto: não há tela de
  * login intermediária, e o `ControleDeAcesso` leva ao dashboard sozinho.
  */
-export function useCadastro() {
+export function useCadastroMutation() {
   const iniciarSessao = useIniciarSessao();
 
   return useMutation({
