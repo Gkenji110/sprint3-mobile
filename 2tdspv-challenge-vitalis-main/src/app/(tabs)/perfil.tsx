@@ -217,13 +217,13 @@ export default function PerfilScreen() {
                 Senha
               </Text>
               <Text className="text-on-surface-variant font-body text-xs ml-1 -mt-1">
-                Confirme sua senha para salvar as alterações.
+                Obrigatória para salvar. Repita a senha atual para não mudá-la, ou digite uma nova para trocá-la.
               </Text>
               <MyTextInput
                 name="senha"
                 control={control}
                 className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl text-on-surface font-medium"
-                placeholder="Sua senha atual"
+                placeholder="Senha atual ou nova senha"
                 secureTextEntry
               />
             </View>
