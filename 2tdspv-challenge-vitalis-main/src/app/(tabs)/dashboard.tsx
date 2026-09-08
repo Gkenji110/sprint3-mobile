@@ -67,7 +67,7 @@ export default function DashboardScreen() {
               Nenhum pet cadastrado
             </Text>
             <Text className="text-on-surface-variant text-center font-body">
-              Vá até a aba Pets e cadastre seu primeiro pet!
+              Seus pets aparecem aqui assim que a clínica os cadastrar.
             </Text>
           </View>
         )}
@@ -83,7 +83,7 @@ export default function DashboardScreen() {
             className="flex-1 bg-surface-container-low rounded-2xl p-4 items-center gap-2"
             onPress={() => {
               if (pets.length === 0) {
-                Alert.alert("Atenção", "Cadastre um pet primeiro!");
+                Alert.alert("Atenção", "Nenhum pet cadastrado ainda. Peça para a clínica cadastrar seu pet.");
                 return;
               }
               if (pets.length === 1) {
