@@ -39,3 +39,12 @@ export async function listarMeusPets(token: string): Promise<PetApiResponse[]> {
   );
   return pagina.content;
 }
+
+/**
+ * Só leitura, de propósito: o `SecurityConfig` do `pethub-java` restringe
+ * `POST`/`PUT`/`DELETE /api/pets` ao perfil VETERINARIO (`ROTAS_ADMINISTRATIVAS`
+ * — "cadastros que só o veterinário administra"). Este app é a interface do
+ * tutor (RESPONSAVEL), que só tem `GET` liberado nesse recurso; tentativas de
+ * escrita aqui sempre voltariam 403. Cadastro/edição/exclusão de pet
+ * pertencem a um futuro app do veterinário, fora do escopo deste projeto.
+ */

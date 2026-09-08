@@ -137,7 +137,7 @@ export default function PerfilScreen() {
 
         {/* Atalho para cadastrar pet */}
         <TouchableOpacity
-          onPress={() => router.navigate("/add-pet")}
+          onPress={() => router.navigate("/(tabs)/pets")}
           className="bg-surface-container-low rounded-2xl p-5 flex-row items-center justify-between mb-6"
         >
           <View className="flex-row items-center gap-3">

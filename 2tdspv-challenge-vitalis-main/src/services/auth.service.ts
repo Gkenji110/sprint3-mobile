@@ -24,13 +24,6 @@ export type Sessao = RespostaDeLogin & {
    * apenas para a interface ter o que exibir; a identidade que vale é o token.
    */
   email: string;
-  /**
-   * Vem de uma segunda chamada (`GET /api/responsaveis/{id}`), não do login:
-   * o `LoginResponse` não traz CPF. Só existe porque `POST /api/pets` exige
-   * esse dado — ver `services/responsavel.service.ts` e
-   * `docs/plano-integracao-api.md`. Ausente se essa busca falhar.
-   */
-  cpf?: string;
 };
 
 /** Este aplicativo é a interface do tutor. O veterinário tem o portal dele. */

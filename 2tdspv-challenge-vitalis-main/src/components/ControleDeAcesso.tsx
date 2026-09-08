@@ -7,7 +7,7 @@ import { ActivityIndicator, View } from "react-native";
  * Decide quem pode estar em qual rota.
  *
  * Fica num lugar só, envolvendo toda a navegação, em vez de cada tela se
- * defender sozinha: assim as telas soltas fora das abas — `add-pet`,
+ * defender sozinha: assim as telas soltas fora das abas — `edit-lembrete`,
  * `teleconsulta` — ficam protegidas sem precisar lembrar de cada uma, e as
  * telas futuras já nascem protegidas.
  */
