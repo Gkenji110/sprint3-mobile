@@ -1,4 +1,3 @@
-import { useConsulta } from "@/context/ConsultaContext";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
@@ -59,23 +58,16 @@ export default function SugestaoIaScreen() {
     descricao: string;
   }>();
 
-  const { addConsulta } = useConsulta();
-
   const urgencia = getUrgencia(sintomas, duracao);
   const config = URGENCIA_CONFIG[urgencia];
 
-  const handleAgendar = () => {
-    addConsulta({
-      veterinario: "A definir",
-      clinica: "A definir",
-      data: new Date().toLocaleDateString("pt-BR"),
-      hora: new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-      status: "Agendada",
-      pet,
-    });
+  /**
+   * Agendar consulta de verdade é ação do veterinário/clínica na API (ver
+   * `pet.service.ts`/`consulta.service.ts` — `SecurityConfig` restringe
+   * escrita em `/api/consultas` a VETERINARIO). O tutor só é direcionado para
+   * o histórico real; nada é criado localmente aqui.
+   */
+  const handleVerConsultas = () => {
     router.navigate("/(tabs)/consultas");
   };
 
@@ -150,12 +142,12 @@ export default function SugestaoIaScreen() {
 
           {/* Botões */}
           <TouchableOpacity
-            onPress={handleAgendar}
+            onPress={handleVerConsultas}
             className={`w-full ${config.corBotao} h-16 rounded-2xl items-center justify-center flex-row gap-3`}
           >
             <MaterialIcons name="medical-services" size={24} color="white" />
             <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
-              Agendar Consulta
+              Ver Minhas Consultas
             </Text>
           </TouchableOpacity>
 

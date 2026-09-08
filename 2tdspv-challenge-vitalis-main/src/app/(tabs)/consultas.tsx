@@ -1,73 +1,62 @@
-import { useConsulta } from "@/context/ConsultaContext";
+import { useConsultas } from "@/hooks/useConsultas";
 import ConsultaCard from "@/components/ConsultaCard";
-import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+/**
+ * A API só permite agendar/editar/cancelar consulta (`/api/consultas`) para o
+ * perfil VETERINARIO (ver `SecurityConfig` do `pethub-java`) — o tutor só lê
+ * o histórico. Agendamento é feito pela clínica.
+ */
 export default function ConsultasScreen() {
-  const { consultas, removeConsulta } = useConsulta();
-
-  const handleExcluir = (index: number) => {
-    Alert.alert(
-      "Excluir Consulta",
-      "Deseja excluir esta consulta?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => removeConsulta(index),
-        },
-      ]
-    );
-  };
+  const { data: consultas = [], isLoading, isError } = useConsultas();
 
   return (
     <SafeAreaView className="flex-1 bg-surface">
 
       {/* Header */}
-      <View className="flex-row items-center justify-between px-6 pt-4 mb-6">
-        <View>
-          <Text className="text-on-surface-variant font-semibold tracking-wide uppercase text-xs font-headline">
-            Histórico
-          </Text>
-          <Text className="text-4xl font-extrabold tracking-tighter text-on-surface font-headline">
-            Consultas
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => router.navigate("/sintomas")}
-          className="bg-primary w-12 h-12 rounded-full items-center justify-center"
-        >
-          <MaterialIcons name="add" size={28} color="white" />
-        </TouchableOpacity>
+      <View className="px-6 pt-4 mb-6">
+        <Text className="text-on-surface-variant font-semibold tracking-wide uppercase text-xs font-headline">
+          Histórico
+        </Text>
+        <Text className="text-4xl font-extrabold tracking-tighter text-on-surface font-headline">
+          Consultas
+        </Text>
       </View>
 
-      {/* Lista */}
-      <FlatList
-        data={consultas}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 12 }}
-        keyExtractor={(_, index) => index.toString()}
-        ListEmptyComponent={() => (
-          <View className="items-center justify-center gap-4 mt-20">
-            <Text className="text-6xl">🩺</Text>
-            <Text className="text-on-surface font-bold font-headline text-xl">
-              Nenhuma consulta
-            </Text>
-            <Text className="text-on-surface-variant text-center font-body">
-              Toque no + para relatar sintomas e agendar!
-            </Text>
-          </View>
-        )}
-        renderItem={({ item, index }) => (
-          <ConsultaCard
-            consulta={item}
-            index={index}
-            onDelete={() => handleExcluir(index)}
-          />
-        )}
-      />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#02C39A" />
+        </View>
+      ) : isError ? (
+        <View className="items-center justify-center gap-4 mt-20 px-6">
+          <Text className="text-6xl">⚠️</Text>
+          <Text className="text-on-surface font-bold font-headline text-xl text-center">
+            Não foi possível carregar suas consultas
+          </Text>
+          <Text className="text-on-surface-variant text-center font-body">
+            Verifique se o backend está no ar e tente novamente.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={consultas}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 12 }}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={() => (
+            <View className="items-center justify-center gap-4 mt-20 px-6">
+              <Text className="text-6xl">🩺</Text>
+              <Text className="text-on-surface font-bold font-headline text-xl">
+                Nenhuma consulta
+              </Text>
+              <Text className="text-on-surface-variant text-center font-body">
+                Suas consultas agendadas pela clínica aparecem aqui.
+              </Text>
+            </View>
+          )}
+          renderItem={({ item }) => <ConsultaCard consulta={item} />}
+        />
+      )}
 
     </SafeAreaView>
   );

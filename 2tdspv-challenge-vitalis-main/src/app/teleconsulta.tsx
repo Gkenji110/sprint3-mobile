@@ -1,15 +1,23 @@
-import { useConsulta } from "@/context/ConsultaContext";
+import { useConsultas } from "@/hooks/useConsultas";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-export default function TeleconsultaScreen() {
-  const { index } = useLocalSearchParams<{ index: string }>();
-  const { consultas } = useConsulta();
+function formatarDataHora(dataHoraIso: string): { data: string; hora: string } {
+  const data = new Date(dataHoraIso);
+  return {
+    data: data.toLocaleDateString("pt-BR"),
+    hora: data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+  };
+}
 
-  const consulta = index ? consultas[parseInt(index)] : undefined;
+export default function TeleconsultaScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const { data: consultas = [] } = useConsultas();
+
+  const consulta = id ? consultas.find((c) => c.id === Number(id)) : undefined;
 
   const [emChamada, setEmChamada] = useState(false);
   const [micAtivo, setMicAtivo] = useState(true);
@@ -35,7 +43,7 @@ export default function TeleconsultaScreen() {
           </Text>
           <Text className="text-on-surface-variant font-body mt-2">
             {consulta
-              ? `Consulta com ${consulta.veterinario}`
+              ? `Consulta com ${consulta.nomeVeterinario}`
               : "Consulta online com veterinário"}
           </Text>
         </View>
@@ -50,7 +58,7 @@ export default function TeleconsultaScreen() {
                   <MaterialIcons name="person" size={48} color="#00382a" />
                 </View>
                 <Text className="text-white font-headline text-xl font-bold">
-                  {consulta?.veterinario ?? "Veterinário"}
+                  {consulta?.nomeVeterinario ?? "Veterinário"}
                 </Text>
                 <View className="flex-row items-center gap-2">
                   <View className="w-2 h-2 rounded-full bg-primary" />
@@ -82,25 +90,25 @@ export default function TeleconsultaScreen() {
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="person" size={18} color="#404943" />
                   <Text className="text-on-surface font-body">
-                    {consulta.veterinario}
+                    {consulta.nomeVeterinario}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="local-hospital" size={18} color="#404943" />
                   <Text className="text-on-surface font-body">
-                    {consulta.clinica}
+                    {consulta.nomeUnidade}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="pets" size={18} color="#404943" />
                   <Text className="text-on-surface font-body">
-                    {consulta.pet}
+                    {consulta.nomePet}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="calendar-today" size={18} color="#404943" />
                   <Text className="text-on-surface font-body">
-                    {consulta.data} às {consulta.hora}
+                    {formatarDataHora(consulta.dataHora).data} às {formatarDataHora(consulta.dataHora).hora}
                   </Text>
                 </View>
               </View>
