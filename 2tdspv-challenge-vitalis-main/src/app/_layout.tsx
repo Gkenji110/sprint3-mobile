@@ -52,6 +52,7 @@ export default function RootLayout() {
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="(vet)" options={{ headerShown: false }} />
                 <Stack.Screen
                   name="pet-details"
                   options={{
@@ -68,6 +69,18 @@ export default function RootLayout() {
                   name="edit-lembrete"
                   options={{
                     title: "Editar Lembrete",
+                  }}
+                />
+                <Stack.Screen
+                  name="add-pet-vet"
+                  options={{
+                    title: "Novo Pet",
+                  }}
+                />
+                <Stack.Screen
+                  name="edit-pet-vet"
+                  options={{
+                    title: "Editar Pet",
                   }}
                 />
                 <Stack.Screen

@@ -1,5 +1,6 @@
 import { Perfil, respostaDeLoginSchema } from "@/schemas/api/auth.api.schema";
 import { CadastroInput, LoginInput } from "@/schemas/auth.schema";
+import { CadastroVeterinarioInput } from "@/schemas/cadastroVeterinario.schema";
 import { apiClient } from "./api";
 
 /**
@@ -7,6 +8,10 @@ import { apiClient } from "./api";
  *
  * Sabe o que é login e não sabe o que é React: nenhum hook, nenhum componente.
  * Isso mantém a regra de negócio testável e fora da árvore de renderização.
+ *
+ * `POST /api/auth/login` é o mesmo endpoint para os dois perfis — quem
+ * distingue tutor de veterinário é o `perfil` que volta na resposta, não a
+ * rota chamada.
  */
 
 export type Sessao = {
@@ -21,18 +26,9 @@ export type Sessao = {
   email: string;
 };
 
-/** Este aplicativo é a interface do tutor. O veterinário tem o portal dele. */
-const PERFIL_DO_APP: Perfil = "RESPONSAVEL";
-
-export async function autenticarComoTutor(credenciais: LoginInput): Promise<Sessao> {
+export async function autenticar(credenciais: LoginInput): Promise<Sessao> {
   const resposta = await apiClient.post("/api/auth/login", credenciais);
   const resultado = respostaDeLoginSchema.parse(resposta);
-
-  if (resultado.perfil !== PERFIL_DO_APP) {
-    throw new Error(
-      "Este aplicativo é para tutores. Veterinários devem usar o portal da clínica.",
-    );
-  }
 
   return { ...resultado, email: credenciais.email };
 }
@@ -49,6 +45,20 @@ export async function registrarTutor(dados: CadastroInput): Promise<Sessao> {
     // backend assume como verdadeiro quando ausente.
     nome: dados.nome,
     cpf: dados.cpf,
+    email: dados.email,
+    senha: dados.senha,
+  });
+  const resultado = respostaDeLoginSchema.parse(resposta);
+
+  return { ...resultado, email: dados.email };
+}
+
+/** Mesma ideia de `registrarTutor`, para `POST /api/auth/registrar/veterinario`. */
+export async function registrarVeterinario(dados: CadastroVeterinarioInput): Promise<Sessao> {
+  const resposta = await apiClient.post("/api/auth/registrar/veterinario", {
+    nome: dados.nome,
+    crmv: dados.crmv,
+    especialidade: dados.especialidade || undefined,
     email: dados.email,
     senha: dados.senha,
   });

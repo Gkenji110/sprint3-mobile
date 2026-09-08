@@ -118,6 +118,17 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
 
+          {/* Link para Cadastro de Veterinário */}
+          <TouchableOpacity
+            onPress={() => router.replace("/cadastro-veterinario")}
+            className="items-center"
+          >
+            <Text className="text-white/60 font-body">
+              É veterinário?{" "}
+              <Text className="text-primary font-bold">Cadastre-se aqui</Text>
+            </Text>
+          </TouchableOpacity>
+
         </View>
       </ScrollView>
     </SafeAreaView>

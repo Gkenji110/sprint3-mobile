@@ -10,32 +10,33 @@ O PetHub resolve esse problema oferecendo uma plataforma mobile completa que aco
 
 A solução foi desenvolvida como resposta ao desafio proposto pela **CLYVO VET** no **FIAP Challenge 2026**, com o objetivo de construir o sistema operacional do relacionamento contínuo entre clínica, responsável e pet.
 
+Este repositório é o app mobile — a interface do **tutor** (perfil `RESPONSAVEL`). Ele integra com o backend `pethub-java` (Spring Boot), que também atende um futuro portal do veterinário (perfil `VETERINARIO`), fora do escopo deste projeto.
+
 ## Funcionalidades
 
 ### Autenticação
 - Onboarding apresentando o app na primeira abertura
-- Cadastro de conta com nome, email e senha
-- Login com autenticação local via AsyncStorage
-- Logout com retorno ao onboarding
+- Cadastro de conta com nome, CPF, email e senha, via `POST /api/auth/registrar/responsavel`
+- Login via `POST /api/auth/login`, com token JWT devolvido pelo backend
+- Sessão persistida localmente (AsyncStorage) só para não pedir login a cada abertura — quem autentica de fato é a API
+- Logout com retorno à tela de login
 
-### Gestão de Pets
-- Cadastro de pets com nome, espécie, raça, peso e sexo
-- Listagem de todos os pets cadastrados
-- Edição e exclusão de pets
+### Meus Pets (somente leitura)
+- Listagem dos pets do tutor, vindos de `GET /api/pets`
 - Tela de detalhes com informações completas do pet
+- Cadastro, edição e exclusão de pet pertencem ao veterinário: o `SecurityConfig` do backend restringe escrita nesse recurso ao perfil `VETERINARIO` — o app do tutor só consome a leitura
 
 ### Controle de Vacinas
-- Registro de vacinas separadas por pet
+- Registro de vacinas por pet, guardado localmente no dispositivo (recurso auxiliar, não integrado ao backend)
 - Informações de data de aplicação, próxima dose e status
 - Status: Aplicada, Pendente ou Atrasada
 - Histórico completo de vacinas por pet
 
-### Lembretes de Saúde
-- Criação de lembretes com título, data, hora e tipo
-- Tipos: Vacina, Consulta, Medicamento, Check-up e Outro
+### Lembretes de Saúde (CRUD completo via API)
+- Criação, edição e exclusão de lembretes via `POST`/`PUT`/`DELETE /api/lembretes`, listagem via `GET`
+- Tipos: Vacina, Consulta, Exame, Medicamento e Hidratação
 - Vinculação de lembrete ao pet correspondente
-- Edição e exclusão de lembretes
-- Seleção de data e hora via DateTimePicker nativo
+- Seleção de data via `DateTimePicker` nativo
 
 ### Triagem com IA
 - Seleção de sintomas por chips interativos
@@ -46,30 +47,32 @@ A solução foi desenvolvida como resposta ao desafio proposto pela **CLYVO VET*
   - Consulta Recomendada
   - Observação em Casa
 
-### Gestão de Consultas
-- Agendamento de consultas a partir da triagem de sintomas
-- Histórico de consultas com status (Agendada, Concluída, Cancelada)
-- Exclusão de consultas com confirmação
+### Minhas Consultas (somente leitura)
+- Histórico de consultas do tutor, vindo de `GET /api/consultas`
+- Agendar, editar ou cancelar consulta é ação exclusiva do veterinário/clínica (`SecurityConfig` do backend) — fora do escopo deste app
 
 ### Teleconsulta
 - Sala de teleconsulta acessível pelo dashboard e pelas consultas agendadas
 - Controles de microfone e câmera
 - Informações da consulta em andamento
 
-### Perfil do Responsável
-- Cadastro e edição de nome, email e telefone
-- Dados sincronizados automaticamente com o cadastro da conta
-- Exclusão de perfil
-- Atalho para gerenciamento de pets
+### Perfil do Responsável (CRUD completo via API)
+- Leitura via `GET /api/responsaveis/{id}`, edição via `PUT` e exclusão via `DELETE`
+- Edição de nome e email; a API exige a senha em toda atualização, então o formulário sempre pede a senha atual (ou uma nova, caso o tutor queira trocá-la)
+- Exclusão de perfil encerra a sessão e retorna ao login
+- Atalho para a lista de pets
 
 ## Tecnologias
 
 - React Native com Expo
 - Expo Router (navegação)
 - NativeWind (estilização)
-- AsyncStorage (persistência local)
-- React Context API (gerenciamento de estado)
-- React Hook Form + Zod (formulários e validação)
+- TanStack Query (cache, sincronização e estado de carregamento/erro das chamadas à API)
+- Zod (validação de formulários e das respostas da API)
+- React Hook Form (formulários)
+- AsyncStorage (persistência da sessão local)
+- React Context API (sessão de autenticação)
+- Integração REST com o backend `pethub-java` (Spring Boot + JWT + Oracle)
 
 ## Como Rodar
 
@@ -77,7 +80,11 @@ A solução foi desenvolvida como resposta ao desafio proposto pela **CLYVO VET*
 # Instalar dependências
 npm install
 
-# Iniciar o projeto
+# Configurar a URL da API (opcional — por padrão usa localhost:8080 /
+# 10.0.2.2:8080 no emulador Android)
+# EXPO_PUBLIC_API_URL=http://localhost:8080
+
+# Com o backend pethub-java rodando, iniciar o projeto
 npx expo start
 ```
 
@@ -87,14 +94,14 @@ npx expo start
 - Login
 - Cadastro
 - Dashboard
-- Pets (lista, detalhes, cadastro, edição)
+- Pets (lista, detalhes — somente leitura)
 - Vacinas (por pet)
-- Calendário de lembretes
-- Consultas
+- Calendário de lembretes (CRUD completo)
+- Consultas (somente leitura)
 - Relato de Sintomas
 - Sugestão da IA
 - Teleconsulta
-- Perfil do Responsável
+- Perfil do Responsável (CRUD completo)
 
 ## Integrantes
 
