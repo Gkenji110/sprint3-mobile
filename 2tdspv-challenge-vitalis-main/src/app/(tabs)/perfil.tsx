@@ -1,16 +1,22 @@
 import MyTextInput from "@/components/MyTextInput";
 import { useEncerrarSessao } from "@/hooks/useSessao";
-import { useResponsavel } from "@/context/ResponsavelContext";
+import { useResponsavelPerfil } from "@/hooks/useResponsavelPerfil";
+import { useEditarResponsavelMutation } from "@/hooks/useEditarResponsavelMutation";
+import { useExcluirResponsavelMutation } from "@/hooks/useExcluirResponsavelMutation";
 import { ResponsavelInput, ResponsavelSchema } from "@/schemas/responsavel.schema";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
 import { useForm } from "react-hook-form";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const FORM_VAZIO: ResponsavelInput = { nome: "", email: "", senha: "", confirmarSenha: "" };
+
 export default function PerfilScreen() {
-  const { responsavel, updateResponsavel, clearResponsavel } = useResponsavel();
+  const { data: perfil, isLoading } = useResponsavelPerfil();
+  const { mutate: editarPerfil, isPending: salvando } = useEditarResponsavelMutation();
+  const { mutate: excluirPerfil, isPending: excluindo } = useExcluirResponsavelMutation();
   const sair = useEncerrarSessao();
 
   const {
@@ -20,33 +26,33 @@ export default function PerfilScreen() {
     setValue,
     formState: { errors },
   } = useForm<ResponsavelInput>({
-    defaultValues: {
-      nome: "",
-      email: "",
-      telefone: "",
-    },
+    defaultValues: FORM_VAZIO,
     resolver: zodResolver(ResponsavelSchema),
   });
 
   const handleEditar = () => {
-    if (!responsavel) return;
-    setValue("nome", responsavel.nome);
-    setValue("email", responsavel.email);
-    setValue("telefone", responsavel.telefone);
+    if (!perfil) return;
+    setValue("nome", perfil.nome);
+    setValue("email", perfil.email);
   };
 
   const handleExcluir = () => {
     Alert.alert(
       "Excluir Perfil",
-      "Tem certeza que deseja excluir seu perfil?",
+      "Tem certeza que deseja excluir seu perfil? Esta ação não pode ser desfeita.",
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Excluir",
           style: "destructive",
-          onPress: async () => {
-            await clearResponsavel();
-            reset({ nome: "", email: "", telefone: "" });
+          onPress: () => {
+            excluirPerfil(undefined, {
+              onSuccess: async () => {
+                await sair();
+                router.replace("/");
+              },
+              onError: (erro) => Alert.alert("Não foi possível excluir", erro.message),
+            });
           },
         },
       ]
@@ -71,14 +77,18 @@ export default function PerfilScreen() {
     );
   };
 
-  const handleSave = async (data: ResponsavelInput) => {
-    await updateResponsavel(data);
-    reset({
-      nome: "",
-      email: "",
-      telefone: "",
-    });
-    Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+  const handleSave = (data: ResponsavelInput) => {
+    if (!perfil) return;
+    editarPerfil(
+      { nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf },
+      {
+        onSuccess: () => {
+          reset(FORM_VAZIO);
+          Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+        },
+        onError: (erro) => Alert.alert("Não foi possível salvar", erro.message),
+      }
+    );
   };
 
   return (
@@ -99,7 +109,11 @@ export default function PerfilScreen() {
         </View>
 
         {/* Card com dados salvos */}
-        {responsavel && (
+        {isLoading ? (
+          <View className="bg-surface-container-low rounded-3xl p-10 mb-6 items-center">
+            <ActivityIndicator size="large" color="#02C39A" />
+          </View>
+        ) : perfil ? (
           <View className="bg-secondary rounded-3xl p-6 mb-6 gap-2">
             <View className="flex-row items-center justify-between mb-2">
               <View className="flex-row items-center gap-3">
@@ -119,21 +133,21 @@ export default function PerfilScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={handleExcluir}
+                  disabled={excluindo}
                   className="bg-red-500/20 px-3 py-1 rounded-full"
                 >
                   <Text className="text-red-400 font-headline font-bold text-xs uppercase">
-                    Excluir
+                    {excluindo ? "..." : "Excluir"}
                   </Text>
                 </TouchableOpacity>
               </View>
             </View>
             <Text className="text-white font-bold font-headline text-lg">
-              {responsavel.nome}
+              {perfil.nome}
             </Text>
-            <Text className="text-white/70 font-body">{responsavel.email}</Text>
-            <Text className="text-white/70 font-body">{responsavel.telefone}</Text>
+            <Text className="text-white/70 font-body">{perfil.email}</Text>
           </View>
-        )}
+        ) : null}
 
         {/* Atalho para cadastrar pet */}
         <TouchableOpacity
@@ -195,14 +209,30 @@ export default function PerfilScreen() {
 
             <View className="gap-2">
               <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
-                Telefone
+                Senha
+              </Text>
+              <Text className="text-on-surface-variant font-body text-xs ml-1 -mt-1">
+                Confirme sua senha para salvar as alterações.
               </Text>
               <MyTextInput
-                name="telefone"
+                name="senha"
                 control={control}
                 className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl text-on-surface font-medium"
-                placeholder="Ex: (11) 99999-9999"
-                keyboardType="phone-pad"
+                placeholder="Sua senha atual"
+                secureTextEntry
+              />
+            </View>
+
+            <View className="gap-2">
+              <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
+                Confirmar senha
+              </Text>
+              <MyTextInput
+                name="confirmarSenha"
+                control={control}
+                className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl text-on-surface font-medium"
+                placeholder="Repita a senha"
+                secureTextEntry
               />
             </View>
           </View>
@@ -210,12 +240,20 @@ export default function PerfilScreen() {
           {/* Botão Salvar */}
           <TouchableOpacity
             onPress={handleSubmit(handleSave)}
+            disabled={salvando}
+            style={{ opacity: salvando ? 0.6 : 1 }}
             className="w-full bg-primary h-16 rounded-2xl items-center justify-center flex-row gap-3"
           >
-            <MaterialIcons name="save" size={24} color="white" />
-            <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
-              Salvar Perfil
-            </Text>
+            {salvando ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <>
+                <MaterialIcons name="save" size={24} color="white" />
+                <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
+                  Salvar Perfil
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
 
           {/* Botão Sair */}

@@ -1,19 +1,14 @@
 import { usePets } from "@/hooks/usePets";
-import { useResponsavel } from "@/context/ResponsavelContext";
+import { useResponsavelPerfil } from "@/hooks/useResponsavelPerfil";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
   const { data: pets = [], isLoading } = usePets();
   const current = pets[0];
-  const { responsavel, recarregarResponsavel } = useResponsavel();
-
-  useEffect(() => {
-    recarregarResponsavel();
-  }, []);
+  const { data: responsavel } = useResponsavelPerfil();
 
   return (
     <SafeAreaView className="flex-1 bg-surface">
