@@ -1,4 +1,4 @@
-import { requisitar } from "./api";
+import { extrairMensagemDeErro, URL_BASE } from "./api";
 
 /**
  * Pet como o `pethub-java` devolve em `GET /api/pets`.
@@ -33,10 +33,18 @@ const TAMANHO_SEM_PAGINACAO_NA_UI = 100;
 
 /** Pets do tutor logado. O backend já filtra pelo token — não há id pra passar. */
 export async function listarMeusPets(token: string): Promise<PetApiResponse[]> {
-  const pagina = await requisitar<PaginaDePets>(
-    `/api/pets?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`,
-    { token },
-  );
+  const response = await fetch(`${URL_BASE}/api/pets?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível carregar os pets"));
+  }
+
+  const pagina: PaginaDePets = await response.json();
   return pagina.content;
 }
 

@@ -1,4 +1,4 @@
-import { requisitar } from "./api";
+import { extrairMensagemDeErro, URL_BASE } from "./api";
 
 /**
  * Responsável (tutor) como o `pethub-java` devolve em `GET /api/responsaveis/{id}`.
@@ -35,7 +35,18 @@ export async function buscarResponsavelPorId(
   id: number,
   token: string,
 ): Promise<ResponsavelApiResponse> {
-  return requisitar<ResponsavelApiResponse>(`/api/responsaveis/${id}`, { token });
+  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível carregar o perfil"));
+  }
+
+  return response.json();
 }
 
 export async function atualizarResponsavel(
@@ -43,16 +54,31 @@ export async function atualizarResponsavel(
   dados: ResponsavelRequestBody,
   token: string,
 ): Promise<ResponsavelApiResponse> {
-  return requisitar<ResponsavelApiResponse>(`/api/responsaveis/${id}`, {
-    metodo: "PUT",
-    corpo: dados,
-    token,
+  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dados),
   });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível atualizar o perfil"));
+  }
+
+  return response.json();
 }
 
 export async function excluirResponsavel(id: number, token: string): Promise<void> {
-  await requisitar<{ mensagem: string }>(`/api/responsaveis/${id}`, {
-    metodo: "DELETE",
-    token,
+  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível excluir o perfil"));
+  }
 }

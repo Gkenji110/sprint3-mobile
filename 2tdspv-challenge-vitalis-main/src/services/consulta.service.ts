@@ -1,4 +1,4 @@
-import { requisitar } from "./api";
+import { extrairMensagemDeErro, URL_BASE } from "./api";
 
 /**
  * Consulta como o `pethub-java` devolve em `GET /api/consultas`.
@@ -28,9 +28,17 @@ const TAMANHO_SEM_PAGINACAO_NA_UI = 100;
 
 /** Consultas do tutor logado. O backend já filtra pelos pets dele via token. */
 export async function listarMinhasConsultas(token: string): Promise<ConsultaApiResponse[]> {
-  const pagina = await requisitar<PaginaDeConsultas>(
-    `/api/consultas?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`,
-    { token },
-  );
+  const response = await fetch(`${URL_BASE}/api/consultas?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível carregar as consultas"));
+  }
+
+  const pagina: PaginaDeConsultas = await response.json();
   return pagina.content;
 }

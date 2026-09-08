@@ -1,4 +1,4 @@
-import { requisitar } from "./api";
+import { extrairMensagemDeErro, URL_BASE } from "./api";
 
 /**
  * Lembrete como o `pethub-java` devolve em `GET /api/lembretes`.
@@ -48,10 +48,18 @@ const TAMANHO_SEM_PAGINACAO_NA_UI = 100;
 
 /** Lembretes do tutor logado. O backend já filtra pelo responsável via escopo. */
 export async function listarMeusLembretes(token: string): Promise<LembreteApiResponse[]> {
-  const pagina = await requisitar<PaginaDeLembretes>(
-    `/api/lembretes?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`,
-    { token },
-  );
+  const response = await fetch(`${URL_BASE}/api/lembretes?size=${TAMANHO_SEM_PAGINACAO_NA_UI}`, {
+    headers: {
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível carregar os lembretes"));
+  }
+
+  const pagina: PaginaDeLembretes = await response.json();
   return pagina.content;
 }
 
@@ -59,11 +67,20 @@ export async function criarLembrete(
   dados: LembreteRequestBody,
   token: string,
 ): Promise<LembreteApiResponse> {
-  return requisitar<LembreteApiResponse>("/api/lembretes", {
-    metodo: "POST",
-    corpo: dados,
-    token,
+  const response = await fetch(`${URL_BASE}/api/lembretes`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dados),
   });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível criar o lembrete"));
+  }
+
+  return response.json();
 }
 
 export async function atualizarLembrete(
@@ -71,16 +88,31 @@ export async function atualizarLembrete(
   dados: LembreteRequestBody,
   token: string,
 ): Promise<LembreteApiResponse> {
-  return requisitar<LembreteApiResponse>(`/api/lembretes/${id}`, {
-    metodo: "PUT",
-    corpo: dados,
-    token,
+  const response = await fetch(`${URL_BASE}/api/lembretes/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(dados),
   });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível atualizar o lembrete"));
+  }
+
+  return response.json();
 }
 
 export async function excluirLembrete(id: number, token: string): Promise<void> {
-  await requisitar<{ mensagem: string }>(`/api/lembretes/${id}`, {
-    metodo: "DELETE",
-    token,
+  const response = await fetch(`${URL_BASE}/api/lembretes/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível excluir o lembrete"));
+  }
 }

@@ -1,5 +1,5 @@
 import { CadastroInput, LoginInput } from "@/schemas/auth.schema";
-import { ErroDaApi, requisitar } from "./api";
+import { extrairMensagemDeErro, URL_BASE } from "./api";
 
 /**
  * Autenticação contra o `pethub-java`.
@@ -29,17 +29,21 @@ export type Sessao = RespostaDeLogin & {
 /** Este aplicativo é a interface do tutor. O veterinário tem o portal dele. */
 const PERFIL_DO_APP: Perfil = "RESPONSAVEL";
 
-const NAO_AUTORIZADO = 403;
-
 export async function autenticarComoTutor(credenciais: LoginInput): Promise<Sessao> {
-  const resposta = await requisitar<RespostaDeLogin>("/api/auth/login", {
-    metodo: "POST",
-    corpo: credenciais,
+  const response = await fetch(`${URL_BASE}/api/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(credenciais),
   });
 
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível fazer login"));
+  }
+
+  const resposta: RespostaDeLogin = await response.json();
+
   if (resposta.perfil !== PERFIL_DO_APP) {
-    throw new ErroDaApi(
-      NAO_AUTORIZADO,
+    throw new Error(
       "Este aplicativo é para tutores. Veterinários devem usar o portal da clínica.",
     );
   }
@@ -54,17 +58,23 @@ export async function autenticarComoTutor(credenciais: LoginInput): Promise<Sess
  * vez: não faz sentido pedir a senha de novo na tela seguinte.
  */
 export async function registrarTutor(dados: CadastroInput): Promise<Sessao> {
-  const resposta = await requisitar<RespostaDeLogin>("/api/auth/registrar/responsavel", {
-    metodo: "POST",
+  const response = await fetch(`${URL_BASE}/api/auth/registrar/responsavel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     // `confirmarSenha` existe só para a validação do formulário, e `ativo` o
     // backend assume como verdadeiro quando ausente.
-    corpo: {
+    body: JSON.stringify({
       nome: dados.nome,
       cpf: dados.cpf,
       email: dados.email,
       senha: dados.senha,
-    },
+    }),
   });
 
+  if (!response.ok) {
+    throw new Error(await extrairMensagemDeErro(response, "Não foi possível cadastrar o tutor"));
+  }
+
+  const resposta: RespostaDeLogin = await response.json();
   return { ...resposta, email: dados.email };
 }
