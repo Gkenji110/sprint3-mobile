@@ -18,18 +18,23 @@ function resolverUrlBase(): string {
   return `http://${host}:${PORTA_DO_BACKEND}`;
 }
 
-/** Base para todo `fetch` contra o `pethub-java`. Cada serviço monta a rota a partir daqui. */
-export const URL_BASE = resolverUrlBase();
+const URL_BASE = resolverUrlBase();
+
+type Opcoes = {
+  headers?: Record<string, string>;
+};
+
+type ConfiguracaoDaRequisicao = Opcoes & {
+  metodo?: "GET" | "POST" | "PUT" | "DELETE";
+  corpo?: unknown;
+};
 
 /**
- * Lê a mensagem de erro que o `pethub-java` devolve (`{status, message}`,
- * tanto no `GlobalExceptionHandler` quanto no `SecurityConfig`), com um
- * texto de reserva para quando a resposta não tiver esse formato.
+ * O `pethub-java` erra sempre em `{status, message}`, tanto no
+ * `GlobalExceptionHandler` quanto no `SecurityConfig` — lê essa mensagem
+ * quando existe, com uma de reserva para quando o corpo não vier nesse formato.
  */
-export async function extrairMensagemDeErro(
-  resposta: Response,
-  mensagemDeReserva: string,
-): Promise<string> {
+async function lerMensagemDeErro(resposta: Response): Promise<string> {
   try {
     const corpo = await resposta.json();
     if (typeof corpo.message === "string") {
@@ -38,5 +43,57 @@ export async function extrairMensagemDeErro(
   } catch {
     // Resposta sem corpo JSON: sobra a mensagem de reserva abaixo.
   }
-  return mensagemDeReserva;
+  return `O servidor respondeu ${resposta.status}.`;
 }
+
+async function requisitar(
+  caminho: string,
+  config: ConfiguracaoDaRequisicao = {},
+): Promise<unknown> {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    ...(config.headers ?? {}),
+  };
+  if (config.corpo !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const resposta = await fetch(`${URL_BASE}${caminho}`, {
+    method: config.metodo ?? "GET",
+    headers,
+    body: config.corpo === undefined ? undefined : JSON.stringify(config.corpo),
+  });
+
+  if (!resposta.ok) {
+    throw new Error(await lerMensagemDeErro(resposta));
+  }
+
+  if (resposta.status === 204) {
+    return undefined;
+  }
+
+  return await resposta.json();
+}
+
+/**
+ * Cliente HTTP do backend Java: sabe falar HTTP e nada mais — não conhece
+ * login, pet nem lembrete. Quem dá significado às rotas e valida o formato
+ * da resposta são os serviços em `src/services`, com `zod`.
+ */
+export const apiClient = {
+  get(caminho: string, opcoes: Opcoes = {}) {
+    return requisitar(caminho, opcoes);
+  },
+
+  post(caminho: string, corpo?: unknown, opcoes: Opcoes = {}) {
+    return requisitar(caminho, { ...opcoes, metodo: "POST", corpo });
+  },
+
+  put(caminho: string, corpo: unknown, opcoes: Opcoes = {}) {
+    return requisitar(caminho, { ...opcoes, metodo: "PUT", corpo });
+  },
+
+  async delete(caminho: string, opcoes: Opcoes = {}): Promise<void> {
+    await requisitar(caminho, { ...opcoes, metodo: "DELETE" });
+  },
+};

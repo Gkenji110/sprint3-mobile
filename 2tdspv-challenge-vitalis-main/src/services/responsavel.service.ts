@@ -1,19 +1,7 @@
-import { extrairMensagemDeErro, URL_BASE } from "./api";
+import { ResponsavelApiResponse, responsavelApiResponseSchema } from "@/schemas/api/responsavel.api.schema";
+import { apiClient } from "./api";
 
-/**
- * Responsável (tutor) como o `pethub-java` devolve em `GET /api/responsaveis/{id}`.
- *
- * `telefone` não existe aqui — mora no sub-recurso `/api/responsaveis/{id}/contatos`,
- * fora do escopo deste app por enquanto.
- */
-export type ResponsavelApiResponse = {
-  id: number;
-  nome: string;
-  cpf: string;
-  email: string;
-  ativo: boolean;
-  createdAt: string;
-};
+export type { ResponsavelApiResponse };
 
 /**
  * Corpo de `PUT /api/responsaveis/{id}`.
@@ -35,18 +23,10 @@ export async function buscarResponsavelPorId(
   id: number,
   token: string,
 ): Promise<ResponsavelApiResponse> {
-  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
-    headers: {
-      Accept: "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+  const resposta = await apiClient.get(`/api/responsaveis/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-
-  if (!response.ok) {
-    throw new Error(await extrairMensagemDeErro(response, "Não foi possível carregar o perfil"));
-  }
-
-  return response.json();
+  return responsavelApiResponseSchema.parse(resposta);
 }
 
 export async function atualizarResponsavel(
@@ -54,31 +34,14 @@ export async function atualizarResponsavel(
   dados: ResponsavelRequestBody,
   token: string,
 ): Promise<ResponsavelApiResponse> {
-  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(dados),
+  const resposta = await apiClient.put(`/api/responsaveis/${id}`, dados, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-
-  if (!response.ok) {
-    throw new Error(await extrairMensagemDeErro(response, "Não foi possível atualizar o perfil"));
-  }
-
-  return response.json();
+  return responsavelApiResponseSchema.parse(resposta);
 }
 
 export async function excluirResponsavel(id: number, token: string): Promise<void> {
-  const response = await fetch(`${URL_BASE}/api/responsaveis/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+  await apiClient.delete(`/api/responsaveis/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
   });
-
-  if (!response.ok) {
-    throw new Error(await extrairMensagemDeErro(response, "Não foi possível excluir o perfil"));
-  }
 }
