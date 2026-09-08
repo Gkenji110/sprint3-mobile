@@ -7,6 +7,7 @@ import { ResponsavelInput, ResponsavelSchema } from "@/schemas/responsavel.schem
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -15,8 +16,20 @@ const FORM_VAZIO: ResponsavelInput = { nome: "", email: "", senha: "", confirmar
 
 export default function PerfilScreen() {
   const { data: perfil, isLoading } = useResponsavelPerfil();
-  const { mutate: editarPerfil, isPending: salvando } = useEditarResponsavelMutation();
-  const { mutate: excluirPerfil, isPending: excluindo } = useExcluirResponsavelMutation();
+  const {
+    mutate: editarPerfil,
+    isPending: salvando,
+    isError: erroAoSalvar,
+    isSuccess: salvo,
+    error: erroDoSalvar,
+  } = useEditarResponsavelMutation();
+  const {
+    mutate: excluirPerfil,
+    isPending: excluindo,
+    isError: erroAoExcluir,
+    isSuccess: excluido,
+    error: erroDaExclusao,
+  } = useExcluirResponsavelMutation();
   const sair = useEncerrarSessao();
 
   const {
@@ -29,6 +42,20 @@ export default function PerfilScreen() {
     defaultValues: FORM_VAZIO,
     resolver: zodResolver(ResponsavelSchema),
   });
+
+  // O estado da mutation controla a interface: assim que salva, limpa o
+  // formulário; assim que exclui, encerra a sessão e volta pro login.
+  useEffect(() => {
+    if (salvo) {
+      reset(FORM_VAZIO);
+    }
+  }, [salvo]);
+
+  useEffect(() => {
+    if (excluido) {
+      sair().then(() => router.replace("/"));
+    }
+  }, [excluido]);
 
   const handleEditar = () => {
     if (!perfil) return;
@@ -45,15 +72,7 @@ export default function PerfilScreen() {
         {
           text: "Excluir",
           style: "destructive",
-          onPress: () => {
-            excluirPerfil(undefined, {
-              onSuccess: async () => {
-                await sair();
-                router.replace("/");
-              },
-              onError: (erro) => Alert.alert("Não foi possível excluir", erro.message),
-            });
-          },
+          onPress: () => excluirPerfil(),
         },
       ]
     );
@@ -79,16 +98,7 @@ export default function PerfilScreen() {
 
   const handleSave = (data: ResponsavelInput) => {
     if (!perfil) return;
-    editarPerfil(
-      { nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf },
-      {
-        onSuccess: () => {
-          reset(FORM_VAZIO);
-          Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
-        },
-        onError: (erro) => Alert.alert("Não foi possível salvar", erro.message),
-      }
-    );
+    editarPerfil({ nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf });
   };
 
   return (
@@ -146,6 +156,11 @@ export default function PerfilScreen() {
               {perfil.nome}
             </Text>
             <Text className="text-white/70 font-body">{perfil.email}</Text>
+            {erroAoExcluir && (
+              <Text className="text-red-300 font-body text-sm">
+                {erroDaExclusao.message}
+              </Text>
+            )}
           </View>
         ) : null}
 
@@ -236,6 +251,18 @@ export default function PerfilScreen() {
               />
             </View>
           </View>
+
+          {/* Estado da mutation de salvar */}
+          {erroAoSalvar && (
+            <Text className="text-red-500 text-center font-body -mt-2">
+              {erroDoSalvar.message}
+            </Text>
+          )}
+          {salvo && (
+            <Text className="text-primary text-center font-body font-bold -mt-2">
+              Perfil atualizado com sucesso!
+            </Text>
+          )}
 
           {/* Botão Salvar */}
           <TouchableOpacity

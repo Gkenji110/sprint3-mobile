@@ -9,7 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarioScreen() {
   const { data: lembretes = [], isLoading, isError } = useLembretes();
-  const { mutate: excluirLembrete } = useExcluirLembreteMutation();
+  const { mutate: excluirLembrete, isError: erroAoExcluir, error: erroDeExclusao } = useExcluirLembreteMutation();
 
   const handleExcluir = (lembrete: LembreteApiResponse) => {
     Alert.alert(
@@ -20,11 +20,7 @@ export default function CalendarioScreen() {
         {
           text: "Excluir",
           style: "destructive",
-          onPress: () => {
-            excluirLembrete(lembrete.id, {
-              onError: (erro) => Alert.alert("Não foi possível excluir", erro.message),
-            });
-          },
+          onPress: () => excluirLembrete(lembrete.id),
         },
       ]
     );
@@ -50,6 +46,13 @@ export default function CalendarioScreen() {
           <MaterialIcons name="add" size={28} color="white" />
         </TouchableOpacity>
       </View>
+
+      {/* Erro da mutation de exclusão */}
+      {erroAoExcluir && (
+        <Text className="text-red-500 text-center font-body px-6 mb-4">
+          {erroDeExclusao.message}
+        </Text>
+      )}
 
       {isLoading ? (
         <View className="flex-1 items-center justify-center">

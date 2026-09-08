@@ -6,7 +6,6 @@ import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -15,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CadastroScreen() {
-  const { mutate: cadastrar, isPending } = useCadastroMutation();
+  const { mutate: cadastrar, isPending, isError, error } = useCadastroMutation();
 
   const {
     control,
@@ -35,9 +34,7 @@ export default function CadastroScreen() {
   // O cadastro já autentica, então não há confirmação nem volta para o login:
   // o ControleDeAcesso leva ao dashboard assim que a sessão existe.
   const handleCadastro = (data: CadastroInput) => {
-    cadastrar(data, {
-      onError: (erro) => Alert.alert("Não foi possível criar a conta", erro.message),
-    });
+    cadastrar(data);
   };
 
   return (
@@ -140,6 +137,13 @@ export default function CadastroScreen() {
               secureTextEntry
             />
           </View>
+
+          {/* Erro da mutation */}
+          {isError && (
+            <Text className="text-red-400 text-center font-body">
+              {error.message}
+            </Text>
+          )}
 
           {/* Botão Cadastrar */}
           <TouchableOpacity

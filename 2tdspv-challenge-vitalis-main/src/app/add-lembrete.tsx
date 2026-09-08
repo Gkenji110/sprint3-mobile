@@ -13,11 +13,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -27,7 +26,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddLembreteScreen() {
   const router = useRouter();
-  const { mutate: criarLembrete, isPending } = useCriarLembreteMutation();
+  const { mutate: criarLembrete, isPending, isError, isSuccess, error } = useCriarLembreteMutation();
   const { data: pets = [] } = usePets();
 
   const [date, setDate] = useState(new Date());
@@ -49,15 +48,16 @@ export default function AddLembreteScreen() {
   });
 
   const handleAdd = (data: LembreteInput) => {
-    criarLembrete(data, {
-      onSuccess: () => {
-        Alert.alert("Sucesso", "Lembrete cadastrado com sucesso!", [
-          { text: "OK", onPress: () => router.back() },
-        ]);
-      },
-      onError: (erro) => Alert.alert("Não foi possível cadastrar", erro.message),
-    });
+    criarLembrete(data);
   };
+
+  // O estado da mutation controla a navegação: assim que o lembrete é
+  // criado, volta para o calendário sozinho.
+  useEffect(() => {
+    if (isSuccess) {
+      router.back();
+    }
+  }, [isSuccess]);
 
   return (
     <SafeAreaView className="flex-1 bg-surface">
@@ -214,6 +214,13 @@ export default function AddLembreteScreen() {
               )}
             />
           </View>
+
+          {/* Erro da mutation */}
+          {isError && (
+            <Text className="text-red-500 text-center font-body">
+              {error.message}
+            </Text>
+          )}
 
           {/* Botão Cadastrar */}
           <TouchableOpacity

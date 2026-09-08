@@ -6,7 +6,6 @@ import { router } from "expo-router";
 import { useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -15,7 +14,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function LoginScreen() {
-  const { mutate: autenticar, isPending } = useLoginMutation();
+  const { mutate: autenticar, isPending, isError, error } = useLoginMutation();
 
   const {
     control,
@@ -30,11 +29,9 @@ export default function LoginScreen() {
   });
 
   // Não há navegação no sucesso: assim que a sessão existe, o ControleDeAcesso
-  // leva ao dashboard sozinho.
+  // leva ao dashboard sozinho. O estado da mutation controla o feedback.
   const handleLogin = (data: LoginInput) => {
-    autenticar(data, {
-      onError: (erro) => Alert.alert("Não foi possível entrar", erro.message),
-    });
+    autenticar(data);
   };
 
   return (
@@ -86,6 +83,13 @@ export default function LoginScreen() {
               secureTextEntry
             />
           </View>
+
+          {/* Erro da mutation */}
+          {isError && (
+            <Text className="text-red-400 text-center font-body">
+              {error.message}
+            </Text>
+          )}
 
           {/* Botão Login */}
           <TouchableOpacity

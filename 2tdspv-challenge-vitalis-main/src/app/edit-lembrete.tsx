@@ -14,11 +14,10 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
-  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -34,7 +33,7 @@ export default function EditLembreteScreen() {
   const { data: pets = [] } = usePets();
   const lembrete = lembretes.find((l) => l.id === lembreteId);
 
-  const { mutate: editarLembrete, isPending } = useEditarLembreteMutation(lembreteId);
+  const { mutate: editarLembrete, isPending, isError, isSuccess, error } = useEditarLembreteMutation(lembreteId);
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -57,15 +56,16 @@ export default function EditLembreteScreen() {
   });
 
   const handleSave = (data: LembreteInput) => {
-    editarLembrete(data, {
-      onSuccess: () => {
-        Alert.alert("Sucesso", "Lembrete atualizado com sucesso!", [
-          { text: "OK", onPress: () => router.back() },
-        ]);
-      },
-      onError: (erro) => Alert.alert("Não foi possível salvar", erro.message),
-    });
+    editarLembrete(data);
   };
+
+  // O estado da mutation controla a navegação: assim que salva, volta para
+  // o calendário sozinho.
+  useEffect(() => {
+    if (isSuccess) {
+      router.back();
+    }
+  }, [isSuccess]);
 
   if (isLoading) {
     return (
@@ -230,6 +230,13 @@ export default function EditLembreteScreen() {
               )}
             />
           </View>
+
+          {/* Erro da mutation */}
+          {isError && (
+            <Text className="text-red-500 text-center font-body">
+              {error.message}
+            </Text>
+          )}
 
           {/* Botão Salvar */}
           <TouchableOpacity
