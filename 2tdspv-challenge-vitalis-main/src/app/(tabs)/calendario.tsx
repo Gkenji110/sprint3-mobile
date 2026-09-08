@@ -1,24 +1,30 @@
-import { useLembrete } from "@/context/LembreteContext";
+import { useLembretes } from "@/hooks/useLembretes";
+import { useExcluirLembreteMutation } from "@/hooks/useExcluirLembreteMutation";
+import { LembreteApiResponse } from "@/services/lembrete.service";
 import LembreteCard from "@/components/LembreteCard";
-import { LembreteInput } from "@/schemas/lembrete.schema";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CalendarioScreen() {
-  const { lembretes, removeLembrete } = useLembrete();
+  const { data: lembretes = [], isLoading, isError } = useLembretes();
+  const { mutate: excluirLembrete } = useExcluirLembreteMutation();
 
-  const handleExcluir = (index: number, lembrete: LembreteInput) => {
+  const handleExcluir = (lembrete: LembreteApiResponse) => {
     Alert.alert(
       "Excluir Lembrete",
-      `Deseja excluir o lembrete "${lembrete.titulo}"?`,
+      `Deseja excluir o lembrete "${lembrete.mensagem}"?`,
       [
         { text: "Cancelar", style: "cancel" },
         {
           text: "Excluir",
           style: "destructive",
-          onPress: () => removeLembrete(index),
+          onPress: () => {
+            excluirLembrete(lembrete.id, {
+              onError: (erro) => Alert.alert("Não foi possível excluir", erro.message),
+            });
+          },
         },
       ]
     );
@@ -45,38 +51,50 @@ export default function CalendarioScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Lista */}
-      <FlatList
-        data={lembretes}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 12 }}
-        keyExtractor={(_, index) => index.toString()}
-        ListEmptyComponent={() => (
-          <View className="items-center justify-center gap-4 mt-20">
-            <Text className="text-6xl">📅</Text>
-            <Text className="text-on-surface font-bold font-headline text-xl">
-              Nenhum lembrete
-            </Text>
-            <Text className="text-on-surface-variant text-center font-body">
-              Toque no + para adicionar um lembrete!
-            </Text>
-          </View>
-        )}
-        renderItem={({ item, index }) => (
-          <LembreteCard
-            lembrete={item}
-            onPress={() =>
-              router.navigate({
-                pathname: "/edit-lembrete",
-                params: {
-                  index: index.toString(),
-                  lembrete: JSON.stringify(item),
-                },
-              })
-            }
-            onDelete={() => handleExcluir(index, item)}
-          />
-        )}
-      />
+      {isLoading ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color="#02C39A" />
+        </View>
+      ) : isError ? (
+        <View className="items-center justify-center gap-4 mt-20 px-6">
+          <Text className="text-6xl">⚠️</Text>
+          <Text className="text-on-surface font-bold font-headline text-xl text-center">
+            Não foi possível carregar seus lembretes
+          </Text>
+          <Text className="text-on-surface-variant text-center font-body">
+            Verifique se o backend está no ar e tente novamente.
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={lembretes}
+          contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 24, gap: 12 }}
+          keyExtractor={(item) => item.id.toString()}
+          ListEmptyComponent={() => (
+            <View className="items-center justify-center gap-4 mt-20">
+              <Text className="text-6xl">📅</Text>
+              <Text className="text-on-surface font-bold font-headline text-xl">
+                Nenhum lembrete
+              </Text>
+              <Text className="text-on-surface-variant text-center font-body">
+                Toque no + para adicionar um lembrete!
+              </Text>
+            </View>
+          )}
+          renderItem={({ item }) => (
+            <LembreteCard
+              lembrete={item}
+              onPress={() =>
+                router.navigate({
+                  pathname: "/edit-lembrete",
+                  params: { id: item.id.toString() },
+                })
+              }
+              onDelete={() => handleExcluir(item)}
+            />
+          )}
+        />
+      )}
 
     </SafeAreaView>
   );

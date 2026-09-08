@@ -1,0 +1,19 @@
+import { useAuth } from "@/context/AuthContext";
+import { criarLembrete, LembreteRequestBody } from "@/services/lembrete.service";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+/** O que o formulário coleta — sem `responsavelId`, que vem da sessão. */
+export type DadosDoFormularioDeLembrete = Omit<LembreteRequestBody, "responsavelId">;
+
+export function useCriarLembreteMutation() {
+  const { sessao } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (dados: DadosDoFormularioDeLembrete) =>
+      criarLembrete({ ...dados, responsavelId: sessao!.id }, sessao!.token),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lembretes"] });
+    },
+  });
+}

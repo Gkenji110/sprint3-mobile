@@ -1,19 +1,21 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View } from "react-native";
-import { LembreteInput } from "@/schemas/lembrete.schema";
+import { LembreteApiResponse } from "@/services/lembrete.service";
+import { TIPO_LEMBRETE_LABEL } from "@/schemas/lembrete.schema";
+import { paraDataBr } from "@/utils/data";
 
 interface LembreteCardProps {
-  lembrete: LembreteInput;
+  lembrete: LembreteApiResponse;
   onPress: () => void;
   onDelete: () => void;
 }
 
-const TIPO_ICONE: Record<string, string> = {
-  Vacina: "vaccines",
-  Consulta: "medical-services",
-  Medicamento: "medication",
-  "Check-up": "monitor-heart",
-  Outro: "event-note",
+const TIPO_ICONE: Record<LembreteApiResponse["tipo"], string> = {
+  VACINA: "vaccines",
+  CONSULTA: "medical-services",
+  EXAME: "monitor-heart",
+  MEDICAMENTO: "medication",
+  HIDRATACAO: "water-drop",
 };
 
 const LembreteCard = ({ lembrete, onPress, onDelete }: LembreteCardProps) => {
@@ -32,13 +34,13 @@ const LembreteCard = ({ lembrete, onPress, onDelete }: LembreteCardProps) => {
         </View>
         <View className="flex-1">
           <Text className="text-on-surface font-bold font-headline text-base">
-            {lembrete.titulo}
+            {lembrete.mensagem}
           </Text>
           <Text className="text-on-surface-variant font-body text-sm">
-            {lembrete.petNome} · {lembrete.tipo}
+            {lembrete.nomePet} · {TIPO_LEMBRETE_LABEL[lembrete.tipo]}
           </Text>
           <Text className="text-primary font-body text-sm font-semibold mt-1">
-            {lembrete.data} às {lembrete.hora}
+            {paraDataBr(lembrete.dataAgendada)}
           </Text>
         </View>
         <TouchableOpacity onPress={onDelete}>

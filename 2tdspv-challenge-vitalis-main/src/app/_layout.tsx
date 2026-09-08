@@ -12,7 +12,6 @@ import "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import "../global.css";
 import { PetProvider } from "@/context/PetContext";
-import { LembreteProvider } from "@/context/LembreteContext";
 import { ResponsavelProvider } from "@/context/ResponsavelContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { VacinaProvider } from "@/context/VacinaContext";
@@ -50,52 +49,50 @@ export default function RootLayout() {
         <ControleDeAcesso>
           <ResponsavelProvider>
             <PetProvider>
-              <LembreteProvider>
-                <VacinaProvider>
-                  <Stack>
-                    <Stack.Screen name="login" options={{ headerShown: false }} />
-                    <Stack.Screen name="index" options={{ headerShown: false }} />
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen
-                      name="pet-details"
-                      options={{
-                        title: "Detalhes do Pet",
-                      }}
-                    />
-                    <Stack.Screen
-                      name="add-lembrete"
-                      options={{
-                        title: "Novo Lembrete",
-                      }}
-                    />
-                    <Stack.Screen
-                      name="edit-lembrete"
-                      options={{
-                        title: "Editar Lembrete",
-                      }}
-                    />
-                    <Stack.Screen
-                      name="sintomas"
-                      options={{
-                        title: "Relatar Sintomas",
-                      }}
-                    />
-                    <Stack.Screen
-                      name="sugestao-ia"
-                      options={{
-                        title: "Sugestão",
-                      }}
-                    />
-                    <Stack.Screen
-                      name="teleconsulta"
-                      options={{
-                        title: "Teleconsulta",
-                      }}
-                    />
-                  </Stack>
-                  <StatusBar style="dark" />
-                </VacinaProvider>
-              </LembreteProvider>
+              <VacinaProvider>
+                <Stack>
+                  <Stack.Screen name="login" options={{ headerShown: false }} />
+                  <Stack.Screen name="index" options={{ headerShown: false }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen
+                    name="pet-details"
+                    options={{
+                      title: "Detalhes do Pet",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="add-lembrete"
+                    options={{
+                      title: "Novo Lembrete",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="edit-lembrete"
+                    options={{
+                      title: "Editar Lembrete",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="sintomas"
+                    options={{
+                      title: "Relatar Sintomas",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="sugestao-ia"
+                    options={{
+                      title: "Sugestão",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="teleconsulta"
+                    options={{
+                      title: "Teleconsulta",
+                    }}
+                  />
+                </Stack>
+                <StatusBar style="dark" />
+              </VacinaProvider>
             </PetProvider>
           </ResponsavelProvider>
         </ControleDeAcesso>

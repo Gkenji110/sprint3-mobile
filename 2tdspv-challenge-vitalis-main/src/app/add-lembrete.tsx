@@ -1,11 +1,13 @@
 import MyTextInput from "@/components/MyTextInput";
-import { useLembrete } from "@/context/LembreteContext";
+import { useCriarLembreteMutation } from "@/hooks/useCriarLembreteMutation";
 import { usePets } from "@/hooks/usePets";
 import { iconeDaEspecie } from "@/utils/petIcon";
+import { paraDataIso } from "@/utils/data";
 import {
   LembreteInput,
   LembreteSchema,
   TIPOS_LEMBRETE,
+  TIPO_LEMBRETE_LABEL,
 } from "@/schemas/lembrete.schema";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -14,6 +16,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   Text,
@@ -24,39 +27,36 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function AddLembreteScreen() {
   const router = useRouter();
-  const { addLembrete } = useLembrete();
+  const { mutate: criarLembrete, isPending } = useCriarLembreteMutation();
   const { data: pets = [] } = usePets();
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const {
     control,
     handleSubmit,
     setValue,
-    register,
     formState: { errors },
   } = useForm<LembreteInput>({
     defaultValues: {
-      titulo: "",
-      data: new Date().toLocaleDateString("pt-BR"),
-      hora: new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      mensagem: "",
+      dataAgendada: paraDataIso(new Date()),
       tipo: undefined,
-      petNome: "",
+      petId: undefined,
     },
     resolver: zodResolver(LembreteSchema),
   });
 
-  const handleAdd = (formData: LembreteInput) => {
-    console.log("formData", formData);
-    addLembrete(formData);
-    Alert.alert("Sucesso", "Lembrete cadastrado com sucesso!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+  const handleAdd = (data: LembreteInput) => {
+    criarLembrete(data, {
+      onSuccess: () => {
+        Alert.alert("Sucesso", "Lembrete cadastrado com sucesso!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      },
+      onError: (erro) => Alert.alert("Não foi possível cadastrar", erro.message),
+    });
   };
 
   return (
@@ -75,13 +75,13 @@ export default function AddLembreteScreen() {
 
         <View className="gap-6 pb-24">
 
-          {/* Título */}
+          {/* Mensagem */}
           <View className="gap-2">
             <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
-              Título
+              Mensagem
             </Text>
             <MyTextInput
-              name="titulo"
+              name="mensagem"
               control={control}
               className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl text-on-surface font-medium"
               placeholder="Ex: Vacina V8"
@@ -111,46 +111,7 @@ export default function AddLembreteScreen() {
                   setShowDatePicker(false);
                   if (selectedDate) {
                     setDate(selectedDate);
-                    setValue("data", selectedDate.toLocaleDateString("pt-BR"));
-                  }
-                }}
-              />
-            )}
-          </View>
-
-          {/* Hora */}
-          <View className="gap-2">
-            <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
-              Hora
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowTimePicker(true)}
-              className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl flex-row items-center justify-between"
-            >
-              <Text className="text-on-surface font-medium">
-                {date.toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-              <MaterialIcons name="schedule" size={20} color="#02C39A" />
-            </TouchableOpacity>
-            {showTimePicker && (
-              <DateTimePicker
-                value={date}
-                mode="time"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowTimePicker(false);
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                    setValue(
-                      "hora",
-                      selectedDate.toLocaleTimeString("pt-BR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    );
+                    setValue("dataAgendada", paraDataIso(selectedDate));
                   }
                 }}
               />
@@ -187,7 +148,7 @@ export default function AddLembreteScreen() {
                             : "text-on-surface"
                         }`}
                       >
-                        {t}
+                        {TIPO_LEMBRETE_LABEL[t]}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -211,20 +172,20 @@ export default function AddLembreteScreen() {
             </View>
             <Controller
               control={control}
-              name="petNome"
+              name="petId"
               render={({ field: { onChange, value } }) => (
                 <View className="gap-3">
                   {pets.length === 0 ? (
                     <Text className="text-on-surface-variant font-body text-sm">
-                      Nenhum pet cadastrado. Cadastre um pet primeiro!
+                      Nenhum pet cadastrado.
                     </Text>
                   ) : (
-                    pets.map((pet, index) => (
+                    pets.map((pet) => (
                       <TouchableOpacity
-                        key={index}
-                        onPress={() => onChange(pet.nome)}
+                        key={pet.id}
+                        onPress={() => onChange(pet.id)}
                         className={`flex-row items-center gap-3 p-3 rounded-xl border-2 ${
-                          value === pet.nome
+                          value === pet.id
                             ? "bg-primary-container border-primary"
                             : "bg-surface-container-lowest border-transparent"
                         }`}
@@ -234,7 +195,7 @@ export default function AddLembreteScreen() {
                         </Text>
                         <Text
                           className={`font-bold font-headline ${
-                            value === pet.nome
+                            value === pet.id
                               ? "text-on-primary-container"
                               : "text-on-surface"
                           }`}
@@ -244,9 +205,9 @@ export default function AddLembreteScreen() {
                       </TouchableOpacity>
                     ))
                   )}
-                  {errors.petNome && (
+                  {errors.petId && (
                     <Text className="text-red-500 text-xs">
-                      {errors.petNome.message}
+                      {errors.petId.message}
                     </Text>
                   )}
                 </View>
@@ -257,12 +218,20 @@ export default function AddLembreteScreen() {
           {/* Botão Cadastrar */}
           <TouchableOpacity
             onPress={handleSubmit(handleAdd)}
+            disabled={isPending}
+            style={{ opacity: isPending ? 0.6 : 1 }}
             className="w-full bg-primary h-16 rounded-2xl items-center justify-center flex-row gap-3"
           >
-            <MaterialIcons name="calendar-today" size={24} color="white" />
-            <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
-              Cadastrar Lembrete
-            </Text>
+            {isPending ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <>
+                <MaterialIcons name="calendar-today" size={24} color="white" />
+                <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
+                  Cadastrar Lembrete
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
 
         </View>

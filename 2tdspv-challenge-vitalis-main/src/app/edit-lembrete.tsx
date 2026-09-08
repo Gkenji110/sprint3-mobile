@@ -1,11 +1,14 @@
 import MyTextInput from "@/components/MyTextInput";
-import { useLembrete } from "@/context/LembreteContext";
+import { useLembretes } from "@/hooks/useLembretes";
+import { useEditarLembreteMutation } from "@/hooks/useEditarLembreteMutation";
 import { usePets } from "@/hooks/usePets";
 import { iconeDaEspecie } from "@/utils/petIcon";
+import { paraDataIso } from "@/utils/data";
 import {
   LembreteInput,
   LembreteSchema,
   TIPOS_LEMBRETE,
+  TIPO_LEMBRETE_LABEL,
 } from "@/schemas/lembrete.schema";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -14,6 +17,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   Text,
@@ -23,20 +27,17 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EditLembreteScreen() {
-  const { index, lembrete } = useLocalSearchParams<{
-    index: string;
-    lembrete: string;
-  }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const lembreteId = Number(id);
 
-  const { updateLembrete } = useLembrete();
+  const { data: lembretes = [], isLoading } = useLembretes();
   const { data: pets = [] } = usePets();
+  const lembrete = lembretes.find((l) => l.id === lembreteId);
 
-  const lembreteData: LembreteInput = JSON.parse(lembrete);
-  const lembreteIndex = parseInt(index);
+  const { mutate: editarLembrete, isPending } = useEditarLembreteMutation(lembreteId);
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const {
     control,
@@ -44,22 +45,35 @@ export default function EditLembreteScreen() {
     setValue,
     formState: { errors },
   } = useForm<LembreteInput>({
-    defaultValues: {
-      titulo: lembreteData.titulo,
-      data: lembreteData.data,
-      hora: lembreteData.hora,
-      tipo: lembreteData.tipo,
-      petNome: lembreteData.petNome,
-    },
+    values: lembrete
+      ? {
+          mensagem: lembrete.mensagem,
+          dataAgendada: lembrete.dataAgendada,
+          tipo: lembrete.tipo,
+          petId: lembrete.petId,
+        }
+      : undefined,
     resolver: zodResolver(LembreteSchema),
   });
 
-  const handleSave = (formData: LembreteInput) => {
-    updateLembrete(lembreteIndex, formData);
-    Alert.alert("Sucesso", "Lembrete atualizado com sucesso!", [
-      { text: "OK", onPress: () => router.back() },
-    ]);
+  const handleSave = (data: LembreteInput) => {
+    editarLembrete(data, {
+      onSuccess: () => {
+        Alert.alert("Sucesso", "Lembrete atualizado com sucesso!", [
+          { text: "OK", onPress: () => router.back() },
+        ]);
+      },
+      onError: (erro) => Alert.alert("Não foi possível salvar", erro.message),
+    });
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView className="flex-1 bg-surface items-center justify-center">
+        <ActivityIndicator size="large" color="#02C39A" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-surface">
@@ -77,13 +91,13 @@ export default function EditLembreteScreen() {
 
         <View className="gap-6 pb-24">
 
-          {/* Título */}
+          {/* Mensagem */}
           <View className="gap-2">
             <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
-              Título
+              Mensagem
             </Text>
             <MyTextInput
-              name="titulo"
+              name="mensagem"
               control={control}
               className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl text-on-surface font-medium"
               placeholder="Ex: Vacina V8"
@@ -100,7 +114,7 @@ export default function EditLembreteScreen() {
               className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl flex-row items-center justify-between"
             >
               <Text className="text-on-surface font-medium">
-                {date.toLocaleDateString("pt-BR")}
+                {(lembrete ? new Date(lembrete.dataAgendada + "T00:00:00") : date).toLocaleDateString("pt-BR")}
               </Text>
               <MaterialIcons name="calendar-today" size={20} color="#02C39A" />
             </TouchableOpacity>
@@ -113,46 +127,7 @@ export default function EditLembreteScreen() {
                   setShowDatePicker(false);
                   if (selectedDate) {
                     setDate(selectedDate);
-                    setValue("data", selectedDate.toLocaleDateString("pt-BR"));
-                  }
-                }}
-              />
-            )}
-          </View>
-
-          {/* Hora */}
-          <View className="gap-2">
-            <Text className="text-xs font-bold uppercase tracking-widest text-on-surface-variant ml-1 font-headline">
-              Hora
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowTimePicker(true)}
-              className="w-full h-14 px-5 bg-surface-container-lowest rounded-xl flex-row items-center justify-between"
-            >
-              <Text className="text-on-surface font-medium">
-                {date.toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </Text>
-              <MaterialIcons name="schedule" size={20} color="#02C39A" />
-            </TouchableOpacity>
-            {showTimePicker && (
-              <DateTimePicker
-                value={date}
-                mode="time"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowTimePicker(false);
-                  if (selectedDate) {
-                    setDate(selectedDate);
-                    setValue(
-                      "hora",
-                      selectedDate.toLocaleTimeString("pt-BR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    );
+                    setValue("dataAgendada", paraDataIso(selectedDate));
                   }
                 }}
               />
@@ -189,7 +164,7 @@ export default function EditLembreteScreen() {
                             : "text-on-surface"
                         }`}
                       >
-                        {t}
+                        {TIPO_LEMBRETE_LABEL[t]}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -213,7 +188,7 @@ export default function EditLembreteScreen() {
             </View>
             <Controller
               control={control}
-              name="petNome"
+              name="petId"
               render={({ field: { onChange, value } }) => (
                 <View className="gap-3">
                   {pets.length === 0 ? (
@@ -221,12 +196,12 @@ export default function EditLembreteScreen() {
                       Nenhum pet cadastrado.
                     </Text>
                   ) : (
-                    pets.map((pet, index) => (
+                    pets.map((pet) => (
                       <TouchableOpacity
-                        key={index}
-                        onPress={() => onChange(pet.nome)}
+                        key={pet.id}
+                        onPress={() => onChange(pet.id)}
                         className={`flex-row items-center gap-3 p-3 rounded-xl border-2 ${
-                          value === pet.nome
+                          value === pet.id
                             ? "bg-primary-container border-primary"
                             : "bg-surface-container-lowest border-transparent"
                         }`}
@@ -236,7 +211,7 @@ export default function EditLembreteScreen() {
                         </Text>
                         <Text
                           className={`font-bold font-headline ${
-                            value === pet.nome
+                            value === pet.id
                               ? "text-on-primary-container"
                               : "text-on-surface"
                           }`}
@@ -246,9 +221,9 @@ export default function EditLembreteScreen() {
                       </TouchableOpacity>
                     ))
                   )}
-                  {errors.petNome && (
+                  {errors.petId && (
                     <Text className="text-red-500 text-xs">
-                      {errors.petNome.message}
+                      {errors.petId.message}
                     </Text>
                   )}
                 </View>
@@ -259,12 +234,20 @@ export default function EditLembreteScreen() {
           {/* Botão Salvar */}
           <TouchableOpacity
             onPress={handleSubmit(handleSave)}
+            disabled={isPending}
+            style={{ opacity: isPending ? 0.6 : 1 }}
             className="w-full bg-primary h-16 rounded-2xl items-center justify-center flex-row gap-3"
           >
-            <MaterialIcons name="save" size={24} color="white" />
-            <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
-              Salvar Alterações
-            </Text>
+            {isPending ? (
+              <ActivityIndicator color="#ffffff" />
+            ) : (
+              <>
+                <MaterialIcons name="save" size={24} color="white" />
+                <Text className="text-white font-headline font-black text-lg uppercase tracking-widest">
+                  Salvar Alterações
+                </Text>
+              </>
+            )}
           </TouchableOpacity>
 
         </View>
