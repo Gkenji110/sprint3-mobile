@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { atualizarLembrete } from "@/services/lembrete.service";
 import { DadosDoFormularioDeLembrete } from "./useCriarLembreteMutation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { router } from "expo-router";
 
 export function useEditarLembreteMutation(id: number) {
   const { sessao } = useAuth();
@@ -12,6 +13,7 @@ export function useEditarLembreteMutation(id: number) {
       atualizarLembrete(id, { ...dados, responsavelId: sessao!.id }, sessao!.token),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lembretes"] });
+      router.back();
     },
   });
 }

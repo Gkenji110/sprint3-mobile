@@ -13,8 +13,8 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
@@ -33,7 +33,7 @@ export default function EditLembreteScreen() {
   const { data: pets = [] } = usePets();
   const lembrete = lembretes.find((l) => l.id === lembreteId);
 
-  const { mutate: editarLembrete, isPending, isError, isSuccess, error } = useEditarLembreteMutation(lembreteId);
+  const { mutate: editarLembrete, isPending, isError, error } = useEditarLembreteMutation(lembreteId);
 
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -58,14 +58,6 @@ export default function EditLembreteScreen() {
   const handleSave = (data: LembreteInput) => {
     editarLembrete(data);
   };
-
-  // O estado da mutation controla a navegação: assim que salva, volta para
-  // o calendário sozinho.
-  useEffect(() => {
-    if (isSuccess) {
-      router.back();
-    }
-  }, [isSuccess]);
 
   if (isLoading) {
     return (

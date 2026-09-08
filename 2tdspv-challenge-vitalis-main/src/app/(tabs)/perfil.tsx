@@ -7,7 +7,6 @@ import { ResponsavelInput, ResponsavelSchema } from "@/schemas/responsavel.schem
 import { MaterialIcons } from "@expo/vector-icons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { router } from "expo-router";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,7 +26,6 @@ export default function PerfilScreen() {
     mutate: excluirPerfil,
     isPending: excluindo,
     isError: erroAoExcluir,
-    isSuccess: excluido,
     error: erroDaExclusao,
   } = useExcluirResponsavelMutation();
   const sair = useEncerrarSessao();
@@ -42,20 +40,6 @@ export default function PerfilScreen() {
     defaultValues: FORM_VAZIO,
     resolver: zodResolver(ResponsavelSchema),
   });
-
-  // O estado da mutation controla a interface: assim que salva, limpa o
-  // formulário; assim que exclui, encerra a sessão e volta pro login.
-  useEffect(() => {
-    if (salvo) {
-      reset(FORM_VAZIO);
-    }
-  }, [salvo]);
-
-  useEffect(() => {
-    if (excluido) {
-      sair().then(() => router.replace("/"));
-    }
-  }, [excluido]);
 
   const handleEditar = () => {
     if (!perfil) return;
@@ -96,9 +80,15 @@ export default function PerfilScreen() {
     );
   };
 
+  // A exclusão encerra a sessão e volta pro login de dentro do próprio hook
+  // (useExcluirResponsavelMutation); aqui só limpamos o formulário quando o
+  // salvar dá certo, que é específico desta tela.
   const handleSave = (data: ResponsavelInput) => {
     if (!perfil) return;
-    editarPerfil({ nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf });
+    editarPerfil(
+      { nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf },
+      { onSuccess: () => reset(FORM_VAZIO) },
+    );
   };
 
   return (
