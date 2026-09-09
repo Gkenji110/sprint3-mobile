@@ -11,3 +11,15 @@ export function paraDataBr(dataIso: string): string {
   const [ano, mes, dia] = dataIso.split("-");
   return `${dia}/${mes}/${ano}`;
 }
+
+/**
+ * Formata uma `Date` como `yyyy-MM-ddTHH:mm:ss` (formato que `LocalDateTime`
+ * do Java espera, ex.: em `ConsultaRequest.dataHora`).
+ */
+export function paraDataHoraIso(data: Date): string {
+  const dataParte = paraDataIso(data);
+  const hora = String(data.getHours()).padStart(2, "0");
+  const minuto = String(data.getMinutes()).padStart(2, "0");
+  const segundo = String(data.getSeconds()).padStart(2, "0");
+  return `${dataParte}T${hora}:${minuto}:${segundo}`;
+}

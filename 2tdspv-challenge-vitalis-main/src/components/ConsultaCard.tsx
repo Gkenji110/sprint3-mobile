@@ -5,6 +5,10 @@ import { router } from "expo-router";
 
 interface ConsultaCardProps {
   consulta: ConsultaApiResponse;
+  /** Só o veterinário edita consulta — o tutor não passa isso, e o card vira só leitura. */
+  onPress?: () => void;
+  /** Atalho pro veterinário marcar como realizada sem abrir a edição inteira. */
+  onMarcarRealizada?: () => void;
 }
 
 const STATUS_COLORS: Record<ConsultaApiResponse["status"], string> = {
@@ -34,11 +38,12 @@ function formatarDataHora(dataHoraIso: string): { data: string; hora: string } {
 }
 
 /** Cadastro, edição e cancelamento de consulta são exclusivos do veterinário na API — o tutor só visualiza. */
-const ConsultaCard = ({ consulta }: ConsultaCardProps) => {
+const ConsultaCard = ({ consulta, onPress, onMarcarRealizada }: ConsultaCardProps) => {
   const { data, hora } = formatarDataHora(consulta.dataHora);
+  const Wrapper = onPress ? TouchableOpacity : View;
 
   return (
-    <View className="bg-surface-container-low rounded-2xl p-5 gap-3">
+    <Wrapper onPress={onPress} className="bg-surface-container-low rounded-2xl p-5 gap-3">
       <View className="flex-row items-center justify-between">
         <Text className="text-on-surface font-bold font-headline text-base">
           {consulta.nomeVeterinario}
@@ -61,24 +66,37 @@ const ConsultaCard = ({ consulta }: ConsultaCardProps) => {
             {data} às {hora}
           </Text>
         </View>
-        {consulta.status === "AGENDADA" && consulta.tipo === "TELECONSULTA" && (
-          <TouchableOpacity
-            onPress={() =>
-              router.navigate({
-                pathname: "/teleconsulta",
-                params: { id: consulta.id.toString() },
-              })
-            }
-            className="flex-row items-center gap-2 bg-primary-container px-3 py-2 rounded-xl"
-          >
-            <MaterialIcons name="videocam" size={18} color="#00382a" />
-            <Text className="text-on-primary-container font-headline font-bold text-xs uppercase">
-              Iniciar
-            </Text>
-          </TouchableOpacity>
-        )}
+        <View className="flex-row items-center gap-2">
+          {consulta.status === "AGENDADA" && consulta.tipo === "TELECONSULTA" && (
+            <TouchableOpacity
+              onPress={() =>
+                router.navigate({
+                  pathname: "/teleconsulta",
+                  params: { id: consulta.id.toString() },
+                })
+              }
+              className="flex-row items-center gap-2 bg-primary-container px-3 py-2 rounded-xl"
+            >
+              <MaterialIcons name="videocam" size={18} color="#00382a" />
+              <Text className="text-on-primary-container font-headline font-bold text-xs uppercase">
+                Iniciar
+              </Text>
+            </TouchableOpacity>
+          )}
+          {consulta.status === "AGENDADA" && onMarcarRealizada && (
+            <TouchableOpacity
+              onPress={onMarcarRealizada}
+              className="flex-row items-center gap-2 bg-surface-container-highest px-3 py-2 rounded-xl"
+            >
+              <MaterialIcons name="check-circle-outline" size={18} color="#404943" />
+              <Text className="text-on-surface-variant font-headline font-bold text-xs uppercase">
+                Realizada
+              </Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
-    </View>
+    </Wrapper>
   );
 };
 

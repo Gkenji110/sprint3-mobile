@@ -84,6 +84,18 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="add-consulta-vet"
+                  options={{
+                    title: "Nova Consulta",
+                  }}
+                />
+                <Stack.Screen
+                  name="edit-consulta-vet"
+                  options={{
+                    title: "Editar Consulta",
+                  }}
+                />
+                <Stack.Screen
                   name="sintomas"
                   options={{
                     title: "Relatar Sintomas",
