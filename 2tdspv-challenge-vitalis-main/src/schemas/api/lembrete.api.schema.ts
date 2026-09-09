@@ -6,6 +6,10 @@ import { z } from "zod";
  * `tipo` e `status` são enums de verdade no backend (ao contrário de
  * `especie`/`genero` de pet, que são texto livre) — por isso o mobile usa o
  * mesmo conjunto fechado de valores, não um vocabulário próprio.
+ *
+ * `referenciaId`/`referenciaTipo` usam `.nullish()`: sem um
+ * `@JsonInclude(NON_NULL)` no Spring, um campo vazio chega como `null` no
+ * JSON, não ausente, e `.optional()` sozinho rejeitaria isso.
  */
 export const lembreteApiResponseSchema = z.object({
   id: z.number(),
@@ -17,8 +21,8 @@ export const lembreteApiResponseSchema = z.object({
   dataAgendada: z.string(),
   mensagem: z.string(),
   status: z.enum(["PENDENTE", "ENVIADO", "FALHOU"]),
-  referenciaId: z.number().optional(),
-  referenciaTipo: z.string().optional(),
+  referenciaId: z.number().nullish(),
+  referenciaTipo: z.string().nullish(),
   createdAt: z.string(),
 });
 

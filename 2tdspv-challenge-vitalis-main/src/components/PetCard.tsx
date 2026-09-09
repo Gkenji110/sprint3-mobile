@@ -8,7 +8,7 @@ import { iconeDaEspecie } from "@/utils/petIcon";
 interface PetCardData {
   nome: string;
   especie: string;
-  raca?: string;
+  raca?: string | null;
 }
 
 /** Cadastro e edição de pet são exclusivos do veterinário na API — o tutor só visualiza. */
