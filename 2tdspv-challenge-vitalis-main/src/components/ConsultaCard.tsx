@@ -56,7 +56,7 @@ const ConsultaCard = ({ consulta, onPress, onMarcarRealizada }: ConsultaCardProp
       </View>
 
       <Text className="text-on-surface-variant font-body text-sm">
-        {consulta.nomeUnidade} · {consulta.nomePet}
+        {consulta.nomeUnidade ?? "Unidade não informada"} · {consulta.nomePet}
       </Text>
 
       <View className="flex-row items-center justify-between pt-2 border-t border-outline-variant">

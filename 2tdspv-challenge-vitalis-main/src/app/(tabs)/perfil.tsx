@@ -19,7 +19,6 @@ export default function PerfilScreen() {
     mutate: editarPerfil,
     isPending: salvando,
     isError: erroAoSalvar,
-    isSuccess: salvo,
     error: erroDoSalvar,
   } = useEditarResponsavelMutation();
   const {
@@ -85,9 +84,20 @@ export default function PerfilScreen() {
   // salvar dá certo, que é específico desta tela.
   const handleSave = (data: ResponsavelInput) => {
     if (!perfil) return;
-    editarPerfil(
-      { nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf },
-      { onSuccess: () => reset(FORM_VAZIO) },
+    Alert.alert(
+      "Salvar Perfil",
+      "Deseja salvar as alterações do seu perfil?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Salvar",
+          onPress: () =>
+            editarPerfil(
+              { nome: data.nome, email: data.email, senha: data.senha, cpf: perfil.cpf },
+              { onSuccess: () => reset(FORM_VAZIO) },
+            ),
+        },
+      ]
     );
   };
 
@@ -246,11 +256,6 @@ export default function PerfilScreen() {
           {erroAoSalvar && (
             <Text className="text-red-500 text-center font-body -mt-2">
               {erroDoSalvar.message}
-            </Text>
-          )}
-          {salvo && (
-            <Text className="text-primary text-center font-body font-bold -mt-2">
-              Perfil atualizado com sucesso!
             </Text>
           )}
 

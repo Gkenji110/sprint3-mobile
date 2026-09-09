@@ -96,7 +96,7 @@ export default function TeleconsultaScreen() {
                 <View className="flex-row items-center gap-3">
                   <MaterialIcons name="local-hospital" size={18} color="#404943" />
                   <Text className="text-on-surface font-body">
-                    {consulta.nomeUnidade}
+                    {consulta.nomeUnidade ?? "Unidade não informada"}
                   </Text>
                 </View>
                 <View className="flex-row items-center gap-3">

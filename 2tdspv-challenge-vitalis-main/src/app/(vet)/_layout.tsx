@@ -49,6 +49,15 @@ export default function VetTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="vacinas"
+        options={{
+          title: "Vacinas",
+          tabBarIcon: ({ color }) => (
+            <MaterialIcons name="vaccines" size={28} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="perfil"
         options={{
           title: "Perfil",

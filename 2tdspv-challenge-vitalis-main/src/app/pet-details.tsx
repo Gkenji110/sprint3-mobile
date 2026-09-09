@@ -1,40 +1,26 @@
 import { usePets } from "@/hooks/usePets";
-import { useVacina } from "@/context/VacinaContext";
-import VacinaCard from "@/components/VacinaCard";
+import { useVacinasTratamentos } from "@/hooks/useVacinasTratamentos";
+import VacinaTratamentoCard from "@/components/VacinaTratamentoCard";
 import { iconeDaEspecie } from "@/utils/petIcon";
-import { MaterialIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { ActivityIndicator, Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+/**
+ * `index` é a posição do pet na lista do tutor (mesma convenção já usada
+ * pelas outras telas que navegam pra cá). Vacinas/tratamentos vêm da API de
+ * verdade (`GET /api/vacinas-tratamentos?petId=...`) — `SecurityConfig`
+ * coloca essa rota entre as clínicas, onde o tutor só lê: quem registra é
+ * sempre o veterinário.
+ */
 export default function PetDetailsScreen() {
   const { index } = useLocalSearchParams<{ index: string }>();
   const { data: pets = [], isLoading } = usePets();
-  const { getVacinasPorPet, removeVacina, vacinas } = useVacina();
 
   const petIndex = parseInt(index);
   const pet = pets[petIndex];
-  const vacinasDoPet = getVacinasPorPet(petIndex);
 
-  const handleExcluirVacina = (vacinaIndex: number) => {
-    Alert.alert(
-      "Excluir Vacina",
-      "Deseja excluir esta vacina?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        {
-          text: "Excluir",
-          style: "destructive",
-          onPress: () => {
-            const indexReal = vacinas.findIndex(
-              (v, i) => v.petIndex === petIndex && getVacinasPorPet(petIndex).indexOf(v) === vacinaIndex
-            );
-            removeVacina(indexReal);
-          },
-        },
-      ]
-    );
-  };
+  const { data: vacinas = [], isLoading: carregandoVacinas } = useVacinasTratamentos(pet?.id);
 
   if (isLoading) {
     return (
@@ -95,42 +81,32 @@ export default function PetDetailsScreen() {
           </View>
         </View>
 
-        {/* Vacinas */}
-        <View className="flex-row items-center justify-between mb-4">
+        {/* Vacinas e tratamentos */}
+        <View className="mb-4">
           <Text className="font-headline text-lg font-bold uppercase text-on-surface">
-            Vacinas
+            Vacinas e Tratamentos
           </Text>
-          <TouchableOpacity
-            onPress={() =>
-              router.navigate({
-                pathname: "/add-vacina",
-                params: { petIndex: petIndex.toString() },
-              })
-            }
-            className="bg-primary w-10 h-10 rounded-full items-center justify-center"
-          >
-            <MaterialIcons name="add" size={22} color="white" />
-          </TouchableOpacity>
+          <Text className="text-on-surface-variant font-body text-sm">
+            Registrados pelo veterinário responsável.
+          </Text>
         </View>
 
-        {vacinasDoPet.length === 0 ? (
+        {carregandoVacinas ? (
+          <ActivityIndicator color="#02C39A" />
+        ) : vacinas.length === 0 ? (
           <View className="bg-surface-container-low rounded-2xl p-6 items-center gap-3 mb-6">
             <Text className="text-3xl">💉</Text>
             <Text className="text-on-surface font-bold font-headline">
               Nenhuma vacina cadastrada
             </Text>
             <Text className="text-on-surface-variant font-body text-sm text-center">
-              Toque no + para cadastrar a primeira vacina!
+              O veterinário registra vacinas e tratamentos durante o atendimento.
             </Text>
           </View>
         ) : (
           <View className="gap-3 mb-6">
-            {vacinasDoPet.map((vacina, index) => (
-              <VacinaCard
-                key={index}
-                vacina={vacina}
-                onDelete={() => handleExcluirVacina(index)}
-              />
+            {vacinas.map((item) => (
+              <VacinaTratamentoCard key={item.id} item={item} />
             ))}
           </View>
         )}

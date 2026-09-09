@@ -130,7 +130,7 @@ export default function EditConsultaVetScreen() {
             Editar Consulta
           </Text>
           <Text className="text-on-surface-variant font-body mt-2">
-            {consulta.nomePet} · {consulta.nomeUnidade}
+            {consulta.nomePet} · {consulta.nomeUnidade ?? "Unidade não informada"}
           </Text>
         </View>
 

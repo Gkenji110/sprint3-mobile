@@ -7,8 +7,9 @@ import { z } from "zod";
  * onde `GET` é liberado para VETERINARIO e RESPONSAVEL, mas escrever
  * (agendar/editar/cancelar) exige VETERINARIO.
  *
- * `observacoes` usa `.nullish()`: sem um `@JsonInclude(NON_NULL)` no Spring,
- * uma consulta sem observação chega como `null`, não ausente.
+ * `observacoes`/`nomeUnidade` usam `.nullish()`: sem um
+ * `@JsonInclude(NON_NULL)` no Spring, um campo vazio chega como `null`, não
+ * ausente — visto na prática em consultas antigas sem unidade vinculada.
  */
 export const consultaApiResponseSchema = z.object({
   id: z.number(),
@@ -18,7 +19,7 @@ export const consultaApiResponseSchema = z.object({
   status: z.enum(["AGENDADA", "REALIZADA", "CANCELADA"]),
   nomePet: z.string(),
   nomeVeterinario: z.string(),
-  nomeUnidade: z.string(),
+  nomeUnidade: z.string().nullish(),
 });
 
 export type ConsultaApiResponse = z.infer<typeof consultaApiResponseSchema>;

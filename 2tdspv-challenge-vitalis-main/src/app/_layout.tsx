@@ -13,7 +13,6 @@ import { StatusBar } from "expo-status-bar";
 import "../global.css";
 import { PetProvider } from "@/context/PetContext";
 import { AuthProvider } from "@/context/AuthContext";
-import { VacinaProvider } from "@/context/VacinaContext";
 import ControleDeAcesso from "@/components/ControleDeAcesso";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -47,8 +46,7 @@ export default function RootLayout() {
       <AuthProvider>
         <ControleDeAcesso>
           <PetProvider>
-            <VacinaProvider>
-              <Stack>
+            <Stack>
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -96,6 +94,18 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
+                  name="add-vacina-tratamento-vet"
+                  options={{
+                    title: "Nova Vacina",
+                  }}
+                />
+                <Stack.Screen
+                  name="edit-vacina-tratamento-vet"
+                  options={{
+                    title: "Editar Vacina",
+                  }}
+                />
+                <Stack.Screen
                   name="sintomas"
                   options={{
                     title: "Relatar Sintomas",
@@ -113,9 +123,8 @@ export default function RootLayout() {
                     title: "Teleconsulta",
                   }}
                 />
-              </Stack>
-              <StatusBar style="dark" />
-            </VacinaProvider>
+            </Stack>
+            <StatusBar style="dark" />
           </PetProvider>
         </ControleDeAcesso>
       </AuthProvider>
