@@ -25,7 +25,6 @@ export default function PerfilVeterinarioScreen() {
     mutate: editarPerfil,
     isPending: salvando,
     isError: erroAoSalvar,
-    isSuccess: salvo,
     error: erroDoSalvar,
   } = useEditarVeterinarioMutation(perfil?.crmv ?? "");
   const {
@@ -92,15 +91,26 @@ export default function PerfilVeterinarioScreen() {
   // salvar dá certo, que é específico desta tela.
   const handleSave = (data: VeterinarioPerfilInput) => {
     if (!perfil) return;
-    editarPerfil(
-      {
-        nome: data.nome,
-        especialidade: data.especialidade || undefined,
-        email: data.email,
-        telefone: perfil.telefone ?? undefined,
-        senha: data.senha,
-      },
-      { onSuccess: () => reset(FORM_VAZIO) },
+    Alert.alert(
+      "Salvar Perfil",
+      "Deseja salvar as alterações do seu perfil?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Salvar",
+          onPress: () =>
+            editarPerfil(
+              {
+                nome: data.nome,
+                especialidade: data.especialidade || undefined,
+                email: data.email,
+                telefone: perfil.telefone ?? undefined,
+                senha: data.senha,
+              },
+              { onSuccess: () => reset(FORM_VAZIO) },
+            ),
+        },
+      ]
     );
   };
 
@@ -254,11 +264,6 @@ export default function PerfilVeterinarioScreen() {
           {erroAoSalvar && (
             <Text className="text-red-500 text-center font-body -mt-2">
               {erroDoSalvar.message}
-            </Text>
-          )}
-          {salvo && (
-            <Text className="text-primary text-center font-body font-bold -mt-2">
-              Perfil atualizado com sucesso!
             </Text>
           )}
 
