@@ -11,7 +11,6 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { StatusBar } from "expo-status-bar";
 import "../global.css";
-import { PetProvider } from "@/context/PetContext";
 import { AuthProvider } from "@/context/AuthContext";
 import ControleDeAcesso from "@/components/ControleDeAcesso";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -45,8 +44,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ControleDeAcesso>
-          <PetProvider>
-            <Stack>
+          <Stack>
                 <Stack.Screen name="login" options={{ headerShown: false }} />
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -123,9 +121,8 @@ export default function RootLayout() {
                     title: "Teleconsulta",
                   }}
                 />
-            </Stack>
-            <StatusBar style="dark" />
-          </PetProvider>
+          </Stack>
+          <StatusBar style="dark" />
         </ControleDeAcesso>
       </AuthProvider>
     </QueryClientProvider>
