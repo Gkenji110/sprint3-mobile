@@ -83,7 +83,6 @@ export default function EditConsultaVetScreen() {
     mutate: salvarConsulta,
     isPending,
     isError,
-    isSuccess,
     error,
   } = useAtualizarConsultaMutation(consultaId, petId ?? 0, unidadeId ?? 0);
 
@@ -303,11 +302,6 @@ export default function EditConsultaVetScreen() {
           {/* Estado da mutation */}
           {isError && (
             <Text className="text-red-500 text-center font-body">{error.message}</Text>
-          )}
-          {isSuccess && (
-            <Text className="text-primary text-center font-body font-bold">
-              Consulta atualizada com sucesso!
-            </Text>
           )}
 
           {/* Botão Salvar */}
