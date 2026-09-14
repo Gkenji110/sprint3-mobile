@@ -104,18 +104,6 @@ export default function RootLayout() {
                   }}
                 />
                 <Stack.Screen
-                  name="sintomas"
-                  options={{
-                    title: "Relatar Sintomas",
-                  }}
-                />
-                <Stack.Screen
-                  name="sugestao-ia"
-                  options={{
-                    title: "Sugestão",
-                  }}
-                />
-                <Stack.Screen
                   name="teleconsulta"
                   options={{
                     title: "Teleconsulta",

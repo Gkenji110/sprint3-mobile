@@ -85,17 +85,6 @@ const OnboardScreen = () => {
             </View>
           </View>
           <View className="flex-row items-center gap-3 bg-white/10 p-4 rounded-2xl">
-            <Text className="text-2xl">🩺</Text>
-            <View>
-              <Text className="text-white font-bold font-headline text-sm uppercase">
-                Triagem com IA
-              </Text>
-              <Text className="text-white/60 font-body text-xs">
-                Analise sintomas e agende consultas
-              </Text>
-            </View>
-          </View>
-          <View className="flex-row items-center gap-3 bg-white/10 p-4 rounded-2xl">
             <Text className="text-2xl">📹</Text>
             <View>
               <Text className="text-white font-bold font-headline text-sm uppercase">
