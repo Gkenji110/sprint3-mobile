@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { VacinaTratamentoEditarInput } from "@/schemas/vacinaTratamentoVeterinario.schema";
 import { atualizarVacinaTratamento } from "@/services/vacinaTratamento.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { vacinasTratamentosQueryKey } from "./useVacinasTratamentos";
 import { router } from "expo-router";
 
 /**
@@ -22,7 +23,7 @@ export function useEditarVacinaTratamentoMutation(id: number, petId: number) {
         sessao!.token,
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["vacinas-tratamentos"] });
+      queryClient.invalidateQueries({ queryKey: vacinasTratamentosQueryKey });
       router.back();
     },
     onError: (error) => {

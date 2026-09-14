@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { atualizarResponsavel, ResponsavelRequestBody } from "@/services/responsavel.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { responsavelQueryKey } from "./useResponsavelPerfil";
 
 /** Dados que o formulário de Perfil coleta — `ativo` o hook sempre manda como `true`. */
 export type DadosDoFormularioDeResponsavel = Omit<ResponsavelRequestBody, "ativo">;
@@ -13,7 +14,7 @@ export function useEditarResponsavelMutation() {
     mutationFn: (dados: DadosDoFormularioDeResponsavel) =>
       atualizarResponsavel(sessao!.id, { ...dados, ativo: true }, sessao!.token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["responsavel"] });
+      queryClient.invalidateQueries({ queryKey: responsavelQueryKey });
     },
     onError: (error) => {
       console.error(error);

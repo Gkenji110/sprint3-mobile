@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { criarPet, PetRequestBody } from "@/services/pet.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { petsQueryKey } from "./usePets";
 import { router } from "expo-router";
 
 /** O que o formulário coleta — sem `veterinarioResponsavelId`, que vem da sessão. */
@@ -14,7 +15,7 @@ export function useCriarPetMutation() {
     mutationFn: (dados: DadosDoFormularioDePet) =>
       criarPet({ ...dados, veterinarioResponsavelId: sessao!.id }, sessao!.token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pets"] });
+      queryClient.invalidateQueries({ queryKey: petsQueryKey });
       router.back();
     },
     onError: (error) => {

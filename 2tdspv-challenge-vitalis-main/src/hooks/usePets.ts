@@ -8,11 +8,13 @@ import { useQuery } from "@tanstack/react-query";
  * Só roda com sessão aberta — sem token não há o que pedir, e o backend
  * responderia 401 de qualquer forma.
  */
+export const petsQueryKey = ["pets"] as const;
+
 export function usePets() {
   const { sessao } = useAuth();
 
   return useQuery({
-    queryKey: ["pets"],
+    queryKey: petsQueryKey,
     queryFn: () => listarMeusPets(sessao!.token),
     enabled: sessao !== undefined,
   });

@@ -7,11 +7,13 @@ import { useQuery } from "@tanstack/react-query";
  *
  * Só roda com sessão aberta — sem token/id não há o que pedir.
  */
+export const veterinarioQueryKey = ["veterinario"] as const;
+
 export function useVeterinarioPerfil() {
   const { sessao } = useAuth();
 
   return useQuery({
-    queryKey: ["veterinario", sessao?.id],
+    queryKey: [...veterinarioQueryKey, sessao?.id],
     queryFn: () => buscarVeterinarioPorId(sessao!.id, sessao!.token),
     enabled: sessao !== undefined,
   });

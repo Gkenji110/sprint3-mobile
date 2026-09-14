@@ -7,11 +7,13 @@ import { useQuery } from "@tanstack/react-query";
  *
  * Só roda com sessão aberta — sem token/id não há o que pedir.
  */
+export const responsavelQueryKey = ["responsavel"] as const;
+
 export function useResponsavelPerfil() {
   const { sessao } = useAuth();
 
   return useQuery({
-    queryKey: ["responsavel", sessao?.id],
+    queryKey: [...responsavelQueryKey, sessao?.id],
     queryFn: () => buscarResponsavelPorId(sessao!.id, sessao!.token),
     enabled: sessao !== undefined,
   });

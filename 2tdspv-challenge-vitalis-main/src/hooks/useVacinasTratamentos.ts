@@ -9,11 +9,13 @@ import { useQuery } from "@tanstack/react-query";
  * todas, tutor só as dos pets dele); com `petId`, filtra pra um único pet —
  * usado na tela de detalhes do pet do tutor.
  */
+export const vacinasTratamentosQueryKey = ["vacinas-tratamentos"] as const;
+
 export function useVacinasTratamentos(petId?: number) {
   const { sessao } = useAuth();
 
   return useQuery({
-    queryKey: ["vacinas-tratamentos", petId ?? "todas"],
+    queryKey: [...vacinasTratamentosQueryKey, petId ?? "todas"],
     queryFn: () => listarVacinasTratamentos(sessao!.token, petId),
     enabled: sessao !== undefined,
   });

@@ -1,6 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { atualizarVeterinario, VeterinarioRequestBody } from "@/services/veterinario.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { veterinarioQueryKey } from "./useVeterinarioPerfil";
 
 /** Dados que o formulário de Perfil coleta — `crmv`/`ativo` o hook completa sozinho. */
 export type DadosDoFormularioDeVeterinario = Omit<VeterinarioRequestBody, "crmv" | "ativo">;
@@ -13,7 +14,7 @@ export function useEditarVeterinarioMutation(crmv: string) {
     mutationFn: (dados: DadosDoFormularioDeVeterinario) =>
       atualizarVeterinario(sessao!.id, { ...dados, crmv, ativo: true }, sessao!.token),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["veterinario"] });
+      queryClient.invalidateQueries({ queryKey: veterinarioQueryKey });
     },
     onError: (error) => {
       console.error(error);

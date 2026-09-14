@@ -2,6 +2,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ConsultaEditarInput } from "@/schemas/consultaVeterinario.schema";
 import { atualizarConsulta } from "@/services/consulta.service";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { consultasQueryKey } from "./useConsultas";
 
 /**
  * `petId`/`unidadeId` são pedidos aqui porque o `PUT /api/consultas/{id}`
@@ -22,7 +23,7 @@ export function useAtualizarConsultaMutation(id: number, petId: number, unidadeI
         sessao!.token,
       ),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["consultas"] });
+      queryClient.invalidateQueries({ queryKey: consultasQueryKey });
     },
     onError: (error) => {
       console.error(error);
