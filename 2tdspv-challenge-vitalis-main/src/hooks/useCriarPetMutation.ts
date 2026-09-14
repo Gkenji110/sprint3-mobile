@@ -17,5 +17,8 @@ export function useCriarPetMutation() {
       queryClient.invalidateQueries({ queryKey: ["pets"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

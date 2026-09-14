@@ -15,5 +15,8 @@ export function useCadastroVeterinarioMutation() {
   return useMutation({
     mutationFn: registrarVeterinario,
     onSuccess: iniciarSessao,
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

@@ -12,5 +12,8 @@ export function useExcluirResponsavelMutation() {
       await sair();
       router.replace("/");
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

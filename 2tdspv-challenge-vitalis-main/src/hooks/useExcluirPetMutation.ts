@@ -11,5 +11,8 @@ export function useExcluirPetMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pets"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

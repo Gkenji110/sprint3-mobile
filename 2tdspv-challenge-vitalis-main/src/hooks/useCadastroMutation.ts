@@ -14,5 +14,8 @@ export function useCadastroMutation() {
   return useMutation({
     mutationFn: registrarTutor,
     onSuccess: iniciarSessao,
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

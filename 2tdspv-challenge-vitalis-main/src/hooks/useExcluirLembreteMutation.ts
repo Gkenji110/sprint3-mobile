@@ -11,5 +11,8 @@ export function useExcluirLembreteMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lembretes"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

@@ -15,5 +15,8 @@ export function useEditarVeterinarioMutation(crmv: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["veterinario"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

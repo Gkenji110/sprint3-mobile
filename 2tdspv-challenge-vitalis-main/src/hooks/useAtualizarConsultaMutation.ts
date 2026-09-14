@@ -24,5 +24,8 @@ export function useAtualizarConsultaMutation(id: number, petId: number, unidadeI
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["consultas"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

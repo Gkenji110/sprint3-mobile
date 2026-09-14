@@ -15,5 +15,8 @@ export function useRegistrarVacinaTratamentoMutation() {
       queryClient.invalidateQueries({ queryKey: ["vacinas-tratamentos"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

@@ -25,5 +25,8 @@ export function useEditarVacinaTratamentoMutation(id: number, petId: number) {
       queryClient.invalidateQueries({ queryKey: ["vacinas-tratamentos"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

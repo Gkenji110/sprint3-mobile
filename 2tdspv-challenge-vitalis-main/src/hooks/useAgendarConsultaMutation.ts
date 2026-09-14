@@ -19,5 +19,8 @@ export function useAgendarConsultaMutation() {
       queryClient.invalidateQueries({ queryKey: ["consultas"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

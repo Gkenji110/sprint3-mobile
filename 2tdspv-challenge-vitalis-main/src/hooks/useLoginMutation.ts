@@ -16,5 +16,8 @@ export function useLoginMutation() {
   return useMutation({
     mutationFn: autenticar,
     onSuccess: iniciarSessao,
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

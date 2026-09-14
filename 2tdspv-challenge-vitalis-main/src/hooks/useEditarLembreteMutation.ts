@@ -15,5 +15,8 @@ export function useEditarLembreteMutation(id: number) {
       queryClient.invalidateQueries({ queryKey: ["lembretes"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

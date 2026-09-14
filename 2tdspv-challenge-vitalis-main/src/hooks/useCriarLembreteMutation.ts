@@ -17,5 +17,8 @@ export function useCriarLembreteMutation() {
       queryClient.invalidateQueries({ queryKey: ["lembretes"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

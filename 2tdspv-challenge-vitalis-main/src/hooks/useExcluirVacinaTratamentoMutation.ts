@@ -11,5 +11,8 @@ export function useExcluirVacinaTratamentoMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vacinas-tratamentos"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

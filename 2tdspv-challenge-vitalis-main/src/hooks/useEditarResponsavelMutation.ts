@@ -15,5 +15,8 @@ export function useEditarResponsavelMutation() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["responsavel"] });
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }

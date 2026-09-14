@@ -15,5 +15,8 @@ export function useEditarPetMutation(id: number) {
       queryClient.invalidateQueries({ queryKey: ["pets"] });
       router.back();
     },
+    onError: (error) => {
+      console.error(error);
+    },
   });
 }
